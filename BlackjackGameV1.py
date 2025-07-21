@@ -104,7 +104,6 @@ class HelpWindow:
     
 class GameWindow:
     def __init__(self):
-        
         self.master=Tk()
         self.master.title('Blackjack')
         self.master.resizable(0,0)
@@ -114,9 +113,18 @@ class GameWindow:
         self.main_frame = Frame(self.master, bg='white')
         self.main_frame.pack(fill=BOTH, expand=True)
 
-        # Betting frame
-        self.betting_frame=Frame(self.main_frame, bg='black')
-        self.betting_frame.grid(row=0, column=0, sticky=NSEW)
+        self.create_betting_frame()
+
+        self.master.mainloop()
+
+    def open_playing_frame(self):
+        # Destroys frame and create new one
+        self.betting_frame.destroy()
+        self.create_playing_frame()
+
+    def create_betting_frame(self):
+        self.betting_frame=Frame(self.main_frame)
+        self.betting_frame.pack(fill=BOTH, expand=True)
 
         # Creates a frame to centre betting amount
         self.center_frame = Frame(self.betting_frame)
@@ -129,17 +137,34 @@ class GameWindow:
         self.e_bet_amount = Entry(self.center_frame, font='Arial 25 bold')
         self.e_bet_amount.pack(side=LEFT)
 
-        self.b_bet = Button(self.betting_frame, text='BET', font='Arial 20 bold', fg='white', bg='#FFC300', width=9, command=lambda: self.forward_frame(self.game_frame))
+        self.b_bet = Button(self.betting_frame, text='BET', font='Arial 20 bold', fg='white', bg='#FFC300', width=9, command=self.open_playing_frame)
         self.b_bet.pack(side=BOTTOM, pady=20)
 
-        # Game Frame
-        self.game_frame=Frame(self.main_frame)
-        self.game_frame.grid(row=0, column=0, sticky=NSEW)
+    
+    def create_playing_frame(self):
+        self.playing_frame=Frame(self.main_frame)
+        self.playing_frame.pack(fill=BOTH, expand=True)
 
-        self.master.mainloop()
+        # Sectioning information with frames
+        self.dealer_frame = Frame(self.playing_frame, bg='purple', height=50)
+        self.dealer_frame.pack(fill=X, side=TOP)
 
-    def forward_frame(self, frame):
-        frame.tkraise()
+        self.cards_frame = Frame(self.playing_frame, bg='green')
+        self.cards_frame.pack(fill=BOTH, expand=True)
+
+        self.player_frame = Frame(self.playing_frame, bg='yellow', height=100)
+        self.player_frame.pack(fill=X, side=BOTTOM)
+
+        # Align buttons to the right within the player frame
+        self.right_align = Frame(self.player_frame,)
+        self.right_align.pack(side=RIGHT)
+
+        self.b_hit = Button(self.right_align, text='HIT', font='Arial 20 bold', fg='white', bg='red', width=9)
+        self.b_hit.grid(column=1, row=0, padx=10)
+
+        self.b_stand = Button(self.right_align, text='STAND', font='Arial 20 bold', fg='white', bg='green', width=9)
+        self.b_stand.grid(column=0, row=0, padx=10)
+
 
 app=MainWindow()
         
