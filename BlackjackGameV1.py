@@ -4,11 +4,14 @@ Version One
 Basic set up's of screens
 - Menu Screen
 - Help & Information Screen
-- Game Screen (Both Frames)
+- Game Screen
+    - Betting Frame
+    - Playing Frame
 '''
 
 class MainWindow:
     def __init__(self):
+        '''Menu Window'''
         self.master=Tk()
         self.master.title('Menu')
         self.master.resizable(0,0)
@@ -36,15 +39,18 @@ class MainWindow:
         self.master.mainloop()
 
     def open_helpwindow(self):
+        '''Closes Screen and opens Help Window'''
         self.master.destroy()
         HelpWindow()
 
     def open_gamewindow(self):
+        '''Closes Screen and opens Game Window'''
         self.master.destroy()
         GameWindow()  
 
 class HelpWindow:
     def __init__(self):
+        '''Help Window'''
         self.master=Tk()
         self.master.title('Help & Information')
         self.master.resizable(0,0)
@@ -99,11 +105,13 @@ class HelpWindow:
         self.master.mainloop()
 
     def open_mainwindow(self):
+        '''Closes Screen and opens Menu Window'''
         self.master.destroy()
         MainWindow() 
     
 class GameWindow:
     def __init__(self):
+        '''Game Window'''
         self.master=Tk()
         self.master.title('Blackjack')
         self.master.resizable(0,0)
@@ -118,11 +126,12 @@ class GameWindow:
         self.master.mainloop()
 
     def open_playing_frame(self):
-        # Destroys frame and create new one
+        '''Destroys betting frame and creates playing frame'''
         self.betting_frame.destroy()
         self.create_playing_frame()
 
     def create_betting_frame(self):
+        '''Betting Frame'''
         self.betting_frame=Frame(self.main_frame)
         self.betting_frame.pack(fill=BOTH, expand=True)
 
@@ -142,6 +151,7 @@ class GameWindow:
 
     
     def create_playing_frame(self):
+        '''Playing Frame'''
         self.playing_frame=Frame(self.main_frame)
         self.playing_frame.pack(fill=BOTH, expand=True)
 
