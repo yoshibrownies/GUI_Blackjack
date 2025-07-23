@@ -1,4 +1,5 @@
 from tkinter import *
+from tkinter import messagebox
 import pydealer as pd
 '''
 Version Two
@@ -115,21 +116,50 @@ class Windows:
     def create_playing_window(self):
         self.playing_frame=Frame(self.main_frame)
         self.playing_frame.pack(fill=BOTH, expand=True)
+        
+        # Crating and shuffling Deck
+        self.deck=pd.Deck()
+        self.deck.shuffle()
 
-        # Sectioning information with frames
+        # Creating hands
+        self.dealer_hand = pd.Stack()
+        self.player_hand = pd.Stack()
+
+        self.deal_cards()
+        self.player_total = self.calculate_hand_value(self.player_hand)
+        self.dealer_total = self.calculate_hand_value(self.dealer_hand)
+
+# Sectioning information with frames
+        
+    # Dealer Frame
         self.dealer_frame = Frame(self.playing_frame, bg='purple', height=50)
         self.dealer_frame.pack(fill=X, side=TOP)
 
+    # Cards Frame
         self.cards_frame = Frame(self.playing_frame, bg='green')
         self.cards_frame.pack(fill=BOTH, expand=True)
-
-        self.l_player = Label(self.cards_frame, text='0')
+        
+        # Player Cards & Score
+        self.l_player = Label(self.cards_frame, text=str(self.player_total))
         self.l_player.pack(side=BOTTOM)
 
-        self.l_dealer = Label(self.cards_frame, text='0')
+        self.l_player_card1 = Label(self.cards_frame, text=f'{self.player_hand[0].value} of {self.player_hand[0].suit}')
+        self.l_player_card1.pack(side=BOTTOM)
+
+        self.l_player_card2 = Label(self.cards_frame, text=f'{self.player_hand[1].value} of {self.player_hand[1].suit}')
+        self.l_player_card2.pack(side=BOTTOM)
+
+        # Dealer Cards & Score
+        self.l_dealer = Label(self.cards_frame, text=str(self.dealer_total))
         self.l_dealer.pack(side=TOP)
 
+        self.l_dealer_card1 = Label(self.cards_frame, text=f'{self.dealer_hand[0].value} of {self.dealer_hand[0].suit}')
+        self.l_dealer_card1.pack(side=TOP)
 
+        self.l_dealer_card2 = Label(self.cards_frame, text=f'{self.dealer_hand[1].value} of {self.dealer_hand[1].suit}')
+        self.l_dealer_card2.pack(side=TOP)
+
+    # Player Frame
         self.player_frame = Frame(self.playing_frame, bg='yellow', height=100)
         self.player_frame.pack(fill=X, side=BOTTOM)
 
@@ -137,7 +167,7 @@ class Windows:
         self.right_align = Frame(self.player_frame,)
         self.right_align.pack(side=RIGHT)
 
-        self.b_hit = Button(self.right_align, text='HIT', font='Arial 20 bold', fg='white', bg='red', width=9)
+        self.b_hit = Button(self.right_align, text='HIT', font='Arial 20 bold', fg='white', bg='red', width=9, command=lambda: self.hit('Player'))
         self.b_hit.grid(column=1, row=0, padx=10)
 
         self.b_stand = Button(self.right_align, text='STAND', font='Arial 20 bold', fg='white', bg='green', width=9)
@@ -163,15 +193,56 @@ class Windows:
             self.create_betting_window()
         elif window_name == 'Playing':
             self.create_playing_window()
-    def create_deck(self):
-        # Make a deck of 52 cards
-        self.deck = pd.Deck()
-        self.deck.shuffle()
+
     def deal_cards(self):
-        self.player_hand = pd.Stack()
-        self.dealer_hand = pd.Stack()
+        '''Deals Cards to hands'''
         self.player_hand += self.deck.deal(2)
         self.dealer_hand += self.deck.deal(2)
+        
+    def calculate_hand_value(self, hand):
+        '''Calculates Hand Value'''
+        value = 0
+        aces = 0
+        for card in hand:
+            print(card.value)
+            if card.value in ['Jack', 'Queen', 'King']:
+                value += 10
+            elif card.value == 'Ace':
+                aces +=1
+                value += 11
+            else:
+                value += int(card.value)
+        while value>21 and aces>0:
+            # Changes ace value from 11 to 1 until no longer busting and no more aces
+            value-=10 
+            aces-=1
+        return value
+    
+    def hit(self, person):
+        '''Deals another card to hand'''
+        if person == 'Player':
+            if self.calculate_hand_value(self.player_hand)<=21: # Checking hand hasn't already busted
+                self.player_hand += self.deck.deal(1)
+                self.player_total = self.calculate_hand_value(self.player_hand)
+                self.l_player_card = Label(self.cards_frame, text=f'{self.player_hand[-1].value} of {self.player_hand[-1].suit}')
+                self.l_player_card.pack(side=BOTTOM)
+                self.l_player.configure(text=str(self.player_total))
+                if self.player_total > 21: # Checking if player busts
+                    messagebox.showerror("You Lost", "You Busted.")
+            else:
+                messagebox.showerror("You Already Lost", "You cannot hit again.")
+
+        if person == 'Dealer':
+            if self.calculate_hand_value(self.dealer_hand)<=21: # Checking hand hasn't already busted
+                self.dealer_hand += self.deck.deal(1)
+                self.dealer_total = self.calculate_hand_value(self.dealer_hand)
+                self.l_dealer_card = Label(self.cards_frame, text=f'{self.dealer_hand[-1].value} of {self.dealer_hand[-1].suit}')
+                self.l_dealer_card.pack(side=TOP)
+                self.l_dealer.configure(text=str(self.dealer_total))
+                if self.player_total > 21: # Checking if dealer busts
+                    messagebox.showerror("You Won", "Dealer Busted.")
+
+
 
 
 app=Windows()
