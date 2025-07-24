@@ -1,6 +1,7 @@
 from tkinter import *
 from tkinter import messagebox
 import pydealer as pd
+import json as j
 '''
 Version Two
 - Using 1 Class
@@ -19,6 +20,9 @@ class Windows:
         self.master.title('Blackjack')
         self.master.resizable(0,0)
         self.master.geometry("700x500") 
+
+        with open('Gamehistory.json', 'r') as f:
+            self.data = j.load(f)
 
         # Main frame to hold everything
         self.main_frame = Frame(self.master, bg='white')
@@ -102,6 +106,9 @@ class Windows:
     def create_betting_window(self):
         self.betting_frame=Frame(self.main_frame)
         self.betting_frame.pack(fill=BOTH, expand=True)
+
+        self.l_balance = Label(self.betting_frame, text=f"Balance: ${self.data['Player1']['Balance']}", font='Arial 20 bold')
+        self.l_balance.pack(side=TOP, fill=X, pady=10)
 
         # Creates a frame to centre betting amount
         self.center_frame = Frame(self.betting_frame)
@@ -231,6 +238,8 @@ class Windows:
                 self.l_player.configure(text=str(self.player_total))
                 if self.player_total > 21: # Checking if player busts
                     messagebox.showinfo("You Busted", f"-${self.bet_amount}")
+                    self.data['Player1']['Balance'] -= self.bet_amount
+                    self.save()
                     # Creates play again button
                     self.b_replay = Button(self.cards_frame, text='PLAY AGAIN', font='Arial 20 bold', fg='white', bg='#FFC300', command=lambda: self.open_window('Playing', 'Betting'))
                     self.b_replay.place(relx= 0.5, rely=0.5, anchor=CENTER)
@@ -251,18 +260,28 @@ class Windows:
         self.dealer_total = self.calculate_hand_value(self.dealer_hand) 
         if self.dealer_total > 21: # Checking if dealer busts
             messagebox.showinfo("Dealer Busted", f"+${self.bet_amount}")
+            self.data['Player1']['Balance'] += self.bet_amount
+            self.save()
         
         # Winning Conditions
         elif self.player_total == self.dealer_total:
             messagebox.showinfo("Push", f"+$0")
         elif self.player_total > self.dealer_total:
             messagebox.showinfo(f"You Win", f"+${self.bet_amount}")
+            self.data['Player1']['Balance'] += self.bet_amount
+            self.save()
         elif self.player_total < self.dealer_total:
             messagebox.showinfo(f"You Lose", f"-${self.bet_amount}")
+            self.data['Player1']['Balance'] -= self.bet_amount
+            self.save()
 
         # Creates play again button 
         self.b_replay = Button(self.cards_frame, text='PLAY AGAIN', font='Arial 20 bold', fg='white', bg='#FFC300', command=lambda: self.open_window('Playing', 'Betting'))
         self.b_replay.place(relx= 0.5, rely=0.5, anchor=CENTER)
+    
+    def save(self):
+        '''Saving data to gamehistory file'''
+        with open('Gamehistory.json', 'w') as f:
+            j.dump(self.data, f)
 
 app=Windows()
-        
