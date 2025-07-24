@@ -3,9 +3,11 @@ from tkinter import messagebox
 import pydealer as pd
 '''
 Version Two
-- Different Layout
-- Card Logic
-    - 
+- Using 1 Class
+- Dealing
+Player Actions
+    - Hitting
+    - Standing
 '''
 
 class Windows:
