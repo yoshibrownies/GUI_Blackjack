@@ -170,7 +170,7 @@ class Windows:
         self.b_hit = Button(self.right_align, text='HIT', font='Arial 20 bold', fg='white', bg='red', width=9, command=lambda: self.hit('Player'))
         self.b_hit.grid(column=1, row=0, padx=10)
 
-        self.b_stand = Button(self.right_align, text='STAND', font='Arial 20 bold', fg='white', bg='green', width=9)
+        self.b_stand = Button(self.right_align, text='STAND', font='Arial 20 bold', fg='white', bg='green', width=9, command=self.stand)
         self.b_stand.grid(column=0, row=0, padx=10)
 
     def open_window(self, current_frame, window_name):
@@ -204,7 +204,6 @@ class Windows:
         value = 0
         aces = 0
         for card in hand:
-            print(card.value)
             if card.value in ['Jack', 'Queen', 'King']:
                 value += 10
             elif card.value == 'Ace':
@@ -228,22 +227,27 @@ class Windows:
                 self.l_player_card.pack(side=BOTTOM)
                 self.l_player.configure(text=str(self.player_total))
                 if self.player_total > 21: # Checking if player busts
-                    messagebox.showerror("You Lost", "You Busted.")
+                    messagebox.showinfo("You Lost", "You Busted.")
             else:
                 messagebox.showerror("You Already Lost", "You cannot hit again.")
 
         if person == 'Dealer':
-            if self.calculate_hand_value(self.dealer_hand)<=21: # Checking hand hasn't already busted
-                self.dealer_hand += self.deck.deal(1)
-                self.dealer_total = self.calculate_hand_value(self.dealer_hand)
-                self.l_dealer_card = Label(self.cards_frame, text=f'{self.dealer_hand[-1].value} of {self.dealer_hand[-1].suit}')
-                self.l_dealer_card.pack(side=TOP)
-                self.l_dealer.configure(text=str(self.dealer_total))
-                if self.player_total > 21: # Checking if dealer busts
-                    messagebox.showerror("You Won", "Dealer Busted.")
+            self.dealer_hand += self.deck.deal(1)
+            self.l_dealer_card = Label(self.cards_frame, text=f'{self.dealer_hand[-1].value} of {self.dealer_hand[-1].suit}')
+            self.l_dealer_card.pack(side=TOP)
+            self.l_dealer.configure(text=str(self.calculate_hand_value(self.dealer_hand)))
 
-
-
+    def stand(self):
+        while self.calculate_hand_value(self.dealer_hand)<17:
+            self.hit('Dealer')
+        if self.calculate_hand_value(self.dealer_hand) > 21: # Checking if dealer busts
+            messagebox.showinfo("You Win", "Dealer Busted.")
+        elif self.player_total == self.dealer_total:
+            messagebox.showinfo("Push", "You get your money back")
+        elif self.player_total > self.dealer_total:
+            messagebox.showinfo("You Win", "You Win.")
+        elif self.player_total < self.dealer_total:
+            messagebox.showinfo("You Lose", "Dealer Wins.")
 
 app=Windows()
         
