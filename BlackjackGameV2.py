@@ -8,6 +8,7 @@ Version Two
 Player Actions
     - Hitting
     - Standing
+    - Winning Conditions
 '''
 
 class Windows:
@@ -243,6 +244,8 @@ class Windows:
         self.dealer_total = self.calculate_hand_value(self.dealer_hand) 
         if self.dealer_total > 21: # Checking if dealer busts
             messagebox.showinfo("You Win", "Dealer Busted.")
+        
+        # Winning Conditions
         elif self.player_total == self.dealer_total:
             messagebox.showinfo("Push", "You get your money back")
         elif self.player_total > self.dealer_total:
