@@ -155,11 +155,8 @@ class Windows:
         self.l_dealer = Label(self.cards_frame, text=str(self.dealer_total))
         self.l_dealer.pack(side=TOP)
 
-        self.l_dealer_card1 = Label(self.cards_frame, text=f'{self.dealer_hand[0].value} of {self.dealer_hand[0].suit}')
-        self.l_dealer_card1.pack(side=TOP)
-
-        self.l_dealer_card2 = Label(self.cards_frame, text=f'{self.dealer_hand[1].value} of {self.dealer_hand[1].suit}')
-        self.l_dealer_card2.pack(side=TOP)
+        self.l_dealer_card = Label(self.cards_frame, text=f'{self.dealer_hand[0].value} of {self.dealer_hand[0].suit}')
+        self.l_dealer_card.pack(side=TOP)
 
     # Player Frame
         self.player_frame = Frame(self.playing_frame, bg='yellow', height=100)
@@ -199,7 +196,7 @@ class Windows:
     def deal_cards(self):
         '''Deals Cards to hands'''
         self.player_hand += self.deck.deal(2)
-        self.dealer_hand += self.deck.deal(2)
+        self.dealer_hand += self.deck.deal(1)
         
     def calculate_hand_value(self, hand):
         '''Calculates Hand Value'''
@@ -242,7 +239,9 @@ class Windows:
     def stand(self):
         while self.calculate_hand_value(self.dealer_hand)<17:
             self.hit('Dealer')
-        if self.calculate_hand_value(self.dealer_hand) > 21: # Checking if dealer busts
+        self.player_total = self.calculate_hand_value(self.player_hand)
+        self.dealer_total = self.calculate_hand_value(self.dealer_hand) 
+        if self.dealer_total > 21: # Checking if dealer busts
             messagebox.showinfo("You Win", "Dealer Busted.")
         elif self.player_total == self.dealer_total:
             messagebox.showinfo("Push", "You get your money back")
