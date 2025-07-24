@@ -146,11 +146,11 @@ class Windows:
         self.l_player = Label(self.cards_frame, text=str(self.player_total))
         self.l_player.pack(side=BOTTOM)
 
-        self.l_player_card1 = Label(self.cards_frame, text=f'{self.player_hand[0].value} of {self.player_hand[0].suit}')
-        self.l_player_card1.pack(side=BOTTOM)
+        self.l_player_card = Label(self.cards_frame, text=f'{self.player_hand[0].value} of {self.player_hand[0].suit}')
+        self.l_player_card.pack(side=BOTTOM)
 
-        self.l_player_card2 = Label(self.cards_frame, text=f'{self.player_hand[1].value} of {self.player_hand[1].suit}')
-        self.l_player_card2.pack(side=BOTTOM)
+        self.l_player_card = Label(self.cards_frame, text=f'{self.player_hand[1].value} of {self.player_hand[1].suit}')
+        self.l_player_card.pack(side=BOTTOM)
 
         # Dealer Cards & Score
         self.l_dealer = Label(self.cards_frame, text=str(self.dealer_total))
@@ -228,6 +228,9 @@ class Windows:
                 self.l_player.configure(text=str(self.player_total))
                 if self.player_total > 21: # Checking if player busts
                     messagebox.showinfo("You Lost", "You Busted.")
+                    # Creates play again button
+                    self.b_replay = Button(self.cards_frame, text='PLAY AGAIN', font='Arial 20 bold', fg='white', bg='#FFC300', command=lambda: self.open_window('Playing', 'Betting'))
+                    self.b_replay.place(relx= 0.5, rely=0.5, anchor=CENTER)
             else:
                 messagebox.showerror("You Already Lost", "You cannot hit again.")
 
@@ -238,6 +241,7 @@ class Windows:
             self.l_dealer.configure(text=str(self.calculate_hand_value(self.dealer_hand)))
 
     def stand(self):
+        '''Deals dealer until over 16 and determines who wins'''
         while self.calculate_hand_value(self.dealer_hand)<17:
             self.hit('Dealer')
         self.player_total = self.calculate_hand_value(self.player_hand)
@@ -252,6 +256,10 @@ class Windows:
             messagebox.showinfo("You Win", "You Win.")
         elif self.player_total < self.dealer_total:
             messagebox.showinfo("You Lose", "Dealer Wins.")
+
+        # Creates play again button 
+        self.b_replay = Button(self.cards_frame, text='PLAY AGAIN', font='Arial 20 bold', fg='white', bg='#FFC300', command=lambda: self.open_window('Playing', 'Betting'))
+        self.b_replay.place(relx= 0.5, rely=0.5, anchor=CENTER)
 
 app=Windows()
         
