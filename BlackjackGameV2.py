@@ -124,8 +124,15 @@ class Windows:
         self.e_bet_amount = Entry(self.center_frame, font='Arial 25 bold')
         self.e_bet_amount.pack(side=LEFT)
 
-        self.b_bet = Button(self.betting_frame, text='BET', font='Arial 20 bold', fg='white', bg='#FFC300', width=9, command=self.bet)
-        self.b_bet.pack(side=BOTTOM, pady=20)
+        # Buttons
+        self.button_frame = Frame(self.betting_frame)
+        self.button_frame.pack(side=BOTTOM, pady=20)
+
+        self.b_bet = Button(self.button_frame, text='BET', font='Arial 20 bold', fg='white', bg='green', width=9, command=self.bet)
+        self.b_bet.pack(side=LEFT, padx=30)
+
+        self.b_back = Button(self.button_frame, text='BACK', font='Arial 20 bold', fg='white', bg='red', width=9, command=lambda: self.open_window('Betting','Menu'))
+        self.b_back.pack(side=LEFT, padx=30)
 
     
     def create_playing_window(self):
@@ -196,7 +203,10 @@ class Windows:
         elif current_frame == 'Help':
             self.help_frame.destroy()
         elif current_frame == 'Betting':
-            self.bet_amount = int(self.e_bet_amount.get())
+            try:
+                self.bet_amount = int(self.e_bet_amount.get())
+            except:
+                pass
             self.betting_frame.destroy()
         elif current_frame == 'Playing':
             self.playing_frame.destroy()
