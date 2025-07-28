@@ -31,6 +31,7 @@ class Windows:
         self.master.mainloop()
 
     def create_menu_window(self):
+        '''Creates menu frame'''
         self.menu_frame=Frame(self.main_frame)
         self.menu_frame.pack(fill=BOTH, expand=True)
         # Adds a spacer frame to push buttons down
@@ -53,6 +54,7 @@ class Windows:
         self.b_help.pack(side=LEFT, padx=30)
 
     def create_help_window(self):
+        '''Creates help frame'''
         self.help_frame=Frame(self.main_frame)
         self.help_frame.pack(fill=BOTH, expand=True)
         TITLE_STYLE = 'Arial 15 bold'
@@ -104,6 +106,7 @@ class Windows:
         self.b_back.grid(row=7, column=1, padx=30)
     
     def create_betting_window(self):
+        '''Creates Betting frame'''
         self.betting_frame=Frame(self.main_frame)
         self.betting_frame.pack(fill=BOTH, expand=True)
 
@@ -121,11 +124,12 @@ class Windows:
         self.e_bet_amount = Entry(self.center_frame, font='Arial 25 bold')
         self.e_bet_amount.pack(side=LEFT)
 
-        self.b_bet = Button(self.betting_frame, text='BET', font='Arial 20 bold', fg='white', bg='#FFC300', width=9, command=lambda: self.open_window('Betting', 'Playing'))
+        self.b_bet = Button(self.betting_frame, text='BET', font='Arial 20 bold', fg='white', bg='#FFC300', width=9, command=self.bet)
         self.b_bet.pack(side=BOTTOM, pady=20)
 
     
     def create_playing_window(self):
+        '''Creates playing frame'''
         self.game_over = False
         self.playing_frame=Frame(self.main_frame)
         self.playing_frame.pack(fill=BOTH, expand=True)
@@ -184,6 +188,8 @@ class Windows:
         self.b_stand.grid(column=0, row=0, padx=10)
 
     def open_window(self, current_frame, window_name):
+        '''Opens new frames and destroys previously open one'''
+
         # Destroys Open frame
         if current_frame == 'Menu':
             self.menu_frame.destroy()
@@ -204,6 +210,18 @@ class Windows:
             self.create_betting_window()
         elif window_name == 'Playing':
             self.create_playing_window()
+    
+    def bet (self):
+        '''Checks Betting amount is valid and opens window if so'''
+        try:
+            if int(self.e_bet_amount.get())>self.data['Player1']['Balance']:
+                messagebox.showerror('Error', 'Bet is higher than your balance. Enter lower bet.')
+            elif int(self.e_bet_amount.get())<=0:
+                messagebox.showerror('Error', 'Bet must be greater than 0.')
+            else:
+                self.open_window('Betting', 'Playing')
+        except ValueError:
+            messagebox.showerror('Error', 'Enter only whole numbers.')
 
     def deal_cards(self):
         '''Deals Cards to hands'''
@@ -286,7 +304,7 @@ class Windows:
             messagebox.showerror("Error", "You cannot hit again. Game is over.")
     
     def save(self):
-        '''Saving data to gamehistory file'''
+        '''Saves data to gamehistory file'''
         with open('Gamehistory.json', 'w') as f:
             j.dump(self.data, f)
 
