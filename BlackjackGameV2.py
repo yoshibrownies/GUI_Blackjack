@@ -126,6 +126,7 @@ class Windows:
 
     
     def create_playing_window(self):
+        self.game_over = False
         self.playing_frame=Frame(self.main_frame)
         self.playing_frame.pack(fill=BOTH, expand=True)
         
@@ -244,7 +245,7 @@ class Windows:
                     self.b_replay = Button(self.cards_frame, text='PLAY AGAIN', font='Arial 20 bold', fg='white', bg='#FFC300', command=lambda: self.open_window('Playing', 'Betting'))
                     self.b_replay.place(relx= 0.5, rely=0.5, anchor=CENTER)
             else:
-                messagebox.showerror("You Already Lost", "You cannot hit again.")
+                messagebox.showerror("Error", "You cannot hit again. Game is over.")
 
         if person == 'Dealer':
             self.dealer_hand += self.deck.deal(1)
@@ -254,30 +255,35 @@ class Windows:
 
     def stand(self):
         '''Deals dealer until over 16 and determines who wins'''
-        while self.calculate_hand_value(self.dealer_hand)<17:
-            self.hit('Dealer')
-        self.player_total = self.calculate_hand_value(self.player_hand)
-        self.dealer_total = self.calculate_hand_value(self.dealer_hand) 
-        if self.dealer_total > 21: # Checking if dealer busts
-            messagebox.showinfo("Dealer Busted", f"+${self.bet_amount}")
-            self.data['Player1']['Balance'] += self.bet_amount
-            self.save()
-        
-        # Winning Conditions
-        elif self.player_total == self.dealer_total:
-            messagebox.showinfo("Push", f"+$0")
-        elif self.player_total > self.dealer_total:
-            messagebox.showinfo(f"You Win", f"+${self.bet_amount}")
-            self.data['Player1']['Balance'] += self.bet_amount
-            self.save()
-        elif self.player_total < self.dealer_total:
-            messagebox.showinfo(f"You Lose", f"-${self.bet_amount}")
-            self.data['Player1']['Balance'] -= self.bet_amount
-            self.save()
+        if self.game_over==False:
+            while self.calculate_hand_value(self.dealer_hand)<17:
+                self.hit('Dealer')
+            self.player_total = self.calculate_hand_value(self.player_hand)
+            self.dealer_total = self.calculate_hand_value(self.dealer_hand) 
+            if self.dealer_total > 21: # Checking if dealer busts
+                messagebox.showinfo("Dealer Busted", f"+${self.bet_amount}")
+                self.data['Player1']['Balance'] += self.bet_amount
+                self.save()
+            
+            # Winning Conditions
+            elif self.player_total == self.dealer_total:
+                messagebox.showinfo("Push", f"+$0")
+            elif self.player_total > self.dealer_total:
+                messagebox.showinfo(f"You Win", f"+${self.bet_amount}")
+                self.data['Player1']['Balance'] += self.bet_amount
+                self.save()
+            elif self.player_total < self.dealer_total:
+                messagebox.showinfo(f"You Lose", f"-${self.bet_amount}")
+                self.data['Player1']['Balance'] -= self.bet_amount
+                self.save()
 
-        # Creates play again button 
-        self.b_replay = Button(self.cards_frame, text='PLAY AGAIN', font='Arial 20 bold', fg='white', bg='#FFC300', command=lambda: self.open_window('Playing', 'Betting'))
-        self.b_replay.place(relx= 0.5, rely=0.5, anchor=CENTER)
+            # Creates play again button 
+            self.b_replay = Button(self.cards_frame, text='PLAY AGAIN', font='Arial 20 bold', fg='white', bg='#FFC300', command=lambda: self.open_window('Playing', 'Betting'))
+            self.b_replay.place(relx= 0.5, rely=0.5, anchor=CENTER)
+
+            self.game_over = True
+        else:
+            messagebox.showerror("Error", "You cannot hit again. Game is over.")
     
     def save(self):
         '''Saving data to gamehistory file'''
