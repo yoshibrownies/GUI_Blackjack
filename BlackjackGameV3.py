@@ -319,14 +319,6 @@ class Windows:
     def save(self):
         '''Saves data'''
 
-        # Saves player and dealer totals
-        history = {}
-        history['Bet Amount'] = self.bet_amount
-        history['Player Hand'] = self.player_total
-        history['Dealer Hand'] = self.dealer_total
-
-        self.data['Player1']['Gamehistory'].append(history)
-
         # Saves to gamehistory file
         with open('Gamehistory.json', 'w') as f:
             j.dump(self.data, f, indent=4)
