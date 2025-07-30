@@ -1,1 +1,27 @@
-{"Player1": {"Balance": 995}}
+{
+    "Player1": {
+        "Balance": 1080,
+        "Gamehistory": [
+            {
+                "Bet Amount": 3,
+                "Player Hand": 17,
+                "Dealer Hand": 23
+            },
+            {
+                "Bet Amount": 4,
+                "Player Hand": 21,
+                "Dealer Hand": 18
+            },
+            {
+                "Bet Amount": 20,
+                "Player Hand": 21,
+                "Dealer Hand": 22
+            },
+            {
+                "Bet Amount": 3,
+                "Player Hand": 27,
+                "Dealer Hand": 9
+            }
+        ]
+    }
+}
