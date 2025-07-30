@@ -21,7 +21,7 @@ class Windows:
         self.master.resizable(0,0)
         self.master.geometry("700x500") 
 
-        with open('Gamehistory.json', 'r') as f:
+        with open('Gamehistory.json', 'r') as f: # Getting information from gamehistory file
             self.data = j.load(f)
 
         # Main frame to hold everything
@@ -149,50 +149,55 @@ class Windows:
         self.dealer_hand = pd.Stack()
         self.player_hand = pd.Stack()
 
-        self.deal_cards()
+        # Deals initial cards
+        self.player_hand += self.deck.deal(2)
+        self.dealer_hand += self.deck.deal(1)
         self.player_total = self.calculate_hand_value(self.player_hand)
         self.dealer_total = self.calculate_hand_value(self.dealer_hand)
 
 # Sectioning information with frames
         
     # Dealer Frame
-        self.dealer_frame = Frame(self.playing_frame, bg='purple', height=50)
+        self.dealer_frame = Frame(self.playing_frame, bg='green', height=50)
         self.dealer_frame.pack(fill=X, side=TOP)
+
+        self.l_dealer_title = Label(self.dealer_frame, bg='green', text='Dealer', font='Arial 20 bold')
+        self.l_dealer_title.pack()
 
     # Cards Frame
         self.cards_frame = Frame(self.playing_frame, bg='green')
         self.cards_frame.pack(fill=BOTH, expand=True)
         
         # Player Cards & Score
-        self.l_player = Label(self.cards_frame, text=str(self.player_total))
+        self.l_player = Label(self.cards_frame, text=str(self.player_total), bg='green', font='Arial 15 bold', pady=10)
         self.l_player.pack(side=BOTTOM)
 
-        self.l_player_card = Label(self.cards_frame, text=f'{self.player_hand[0].value} of {self.player_hand[0].suit}')
+        self.l_player_card = Label(self.cards_frame, text=f'{self.player_hand[0].value} of {self.player_hand[0].suit}', bg='green')
         self.l_player_card.pack(side=BOTTOM)
 
-        self.l_player_card = Label(self.cards_frame, text=f'{self.player_hand[1].value} of {self.player_hand[1].suit}')
+        self.l_player_card = Label(self.cards_frame, text=f'{self.player_hand[1].value} of {self.player_hand[1].suit}', bg='green')
         self.l_player_card.pack(side=BOTTOM)
 
         # Dealer Cards & Score
-        self.l_dealer = Label(self.cards_frame, text=str(self.dealer_total))
+        self.l_dealer = Label(self.cards_frame, text=str(self.dealer_total), bg='green', font='Arial 15 bold', pady=10)
         self.l_dealer.pack(side=TOP)
 
-        self.l_dealer_card = Label(self.cards_frame, text=f'{self.dealer_hand[0].value} of {self.dealer_hand[0].suit}')
+        self.l_dealer_card = Label(self.cards_frame, text=f'{self.dealer_hand[0].value} of {self.dealer_hand[0].suit}', bg='green')
         self.l_dealer_card.pack(side=TOP)
 
     # Player Frame
-        self.player_frame = Frame(self.playing_frame, bg='yellow', height=100)
+        self.player_frame = Frame(self.playing_frame, bg='green', height=100)
         self.player_frame.pack(fill=X, side=BOTTOM)
 
         # Align buttons to the right within the player frame
-        self.right_align = Frame(self.player_frame,)
+        self.right_align = Frame(self.player_frame, bg='green')
         self.right_align.pack(side=RIGHT)
 
         self.b_hit = Button(self.right_align, text='HIT', font='Arial 20 bold', fg='white', bg='red', width=9, command=lambda: self.hit('Player'))
-        self.b_hit.grid(column=1, row=0, padx=10)
+        self.b_hit.grid(column=1, row=0, padx=10, pady=5)
 
         self.b_stand = Button(self.right_align, text='STAND', font='Arial 20 bold', fg='white', bg='green', width=9, command=self.stand)
-        self.b_stand.grid(column=0, row=0, padx=10)
+        self.b_stand.grid(column=0, row=0, padx=10, pady=5)
 
     def open_window(self, current_frame, window_name):
         '''Opens new frames and destroys previously open one'''
@@ -203,7 +208,7 @@ class Windows:
         elif current_frame == 'Help':
             self.help_frame.destroy()
         elif current_frame == 'Betting':
-            try:
+            try: # Avoiding value error from empty bet amount entry box
                 self.bet_amount = int(self.e_bet_amount.get())
             except:
                 pass
@@ -233,16 +238,11 @@ class Windows:
         except ValueError:
             messagebox.showerror('Error', 'Enter only whole numbers.')
 
-    def deal_cards(self):
-        '''Deals Cards to hands'''
-        self.player_hand += self.deck.deal(2)
-        self.dealer_hand += self.deck.deal(1)
-        
     def calculate_hand_value(self, hand):
         '''Calculates Hand Value'''
         value = 0
         aces = 0
-        for card in hand:
+        for card in hand: # Loops through each card in given hand
             if card.value in ['Jack', 'Queen', 'King']:
                 value += 10
             elif card.value == 'Ace':
@@ -250,6 +250,7 @@ class Windows:
                 value += 11
             else:
                 value += int(card.value)
+
         while value>21 and aces>0:
             # Changes ace value from 11 to 1 until no longer busting and no more aces
             value-=10 
@@ -262,7 +263,7 @@ class Windows:
             if self.calculate_hand_value(self.player_hand)<=21: # Checking hand hasn't already busted
                 self.player_hand += self.deck.deal(1)
                 self.player_total = self.calculate_hand_value(self.player_hand)
-                self.l_player_card = Label(self.cards_frame, text=f'{self.player_hand[-1].value} of {self.player_hand[-1].suit}')
+                self.l_player_card = Label(self.cards_frame, text=f'{self.player_hand[-1].value} of {self.player_hand[-1].suit}', bg='green')
                 self.l_player_card.pack(side=BOTTOM)
                 self.l_player.configure(text=str(self.player_total))
                 if self.player_total > 21: # Checking if player busts
@@ -276,24 +277,26 @@ class Windows:
                 messagebox.showerror("Error", "You cannot hit again. Game is over.")
 
         if person == 'Dealer':
+            # Dealing & showing dealer hand
             self.dealer_hand += self.deck.deal(1)
-            self.l_dealer_card = Label(self.cards_frame, text=f'{self.dealer_hand[-1].value} of {self.dealer_hand[-1].suit}')
+            self.l_dealer_card = Label(self.cards_frame, text=f'{self.dealer_hand[-1].value} of {self.dealer_hand[-1].suit}', bg='green')
             self.l_dealer_card.pack(side=TOP)
             self.l_dealer.configure(text=str(self.calculate_hand_value(self.dealer_hand)))
 
     def stand(self):
-        '''Deals dealer until over 16 and determines who wins'''
-        if self.game_over==False:
-            while self.calculate_hand_value(self.dealer_hand)<17:
+        '''Deals dealer and determines who wins'''
+
+        if self.game_over==False: # If game is already over, user cannot stand again
+            while self.calculate_hand_value(self.dealer_hand)<17: # Hits dealer until above 16
                 self.hit('Dealer')
             self.player_total = self.calculate_hand_value(self.player_hand)
             self.dealer_total = self.calculate_hand_value(self.dealer_hand) 
-            if self.dealer_total > 21: # Checking if dealer busts
+
+            # Winning Conditions
+            if self.dealer_total > 21:
                 messagebox.showinfo("Dealer Busted", f"+${self.bet_amount}")
                 self.data['Player1']['Balance'] += self.bet_amount
                 self.save()
-            
-            # Winning Conditions
             elif self.player_total == self.dealer_total:
                 messagebox.showinfo("Push", f"+$0")
             elif self.player_total > self.dealer_total:
