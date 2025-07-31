@@ -259,8 +259,8 @@ class Windows:
     
     def hit(self, person):
         '''Deals another card to hand'''
-        if person == 'Player':
-            if self.calculate_hand_value(self.player_hand)<=21: # Checking hand hasn't already busted
+        if self.game_over == False:
+            if person == 'Player':
                 self.player_hand += self.deck.deal(1)
                 self.player_total = self.calculate_hand_value(self.player_hand)
                 self.l_player_card = Label(self.cards_frame, text=f'{self.player_hand[-1].value} of {self.player_hand[-1].suit}', bg='green')
@@ -271,10 +271,9 @@ class Windows:
                     self.data['Player1']['Balance'] -= self.bet_amount
                     self.save()
                     # Creates play again button
-                    self.b_replay = Button(self.cards_frame, text='PLAY AGAIN', font='Arial 20 bold', fg='white', bg='#FFC300', command=lambda: self.open_window('Playing', 'Betting'))
-                    self.b_replay.place(relx= 0.5, rely=0.5, anchor=CENTER)
-            else:
-                messagebox.showerror("Error", "You cannot hit again. Game is over.")
+                    self.play_again()
+        else:
+            messagebox.showerror("Error", "You cannot hit again. Game is over.")
 
         if person == 'Dealer':
             # Dealing & showing dealer hand
@@ -309,18 +308,28 @@ class Windows:
                 self.save()
 
             # Creates play again button 
-            self.b_replay = Button(self.cards_frame, text='PLAY AGAIN', font='Arial 20 bold', fg='white', bg='#FFC300', command=lambda: self.open_window('Playing', 'Betting'))
-            self.b_replay.place(relx= 0.5, rely=0.5, anchor=CENTER)
-
-            self.game_over = True
+            self.play_again()
         else:
-            messagebox.showerror("Error", "You cannot hit again. Game is over.")
+            messagebox.showerror("Error", "You cannot stand again. Game is over.")
     
     def save(self):
         '''Saves data'''
-
+        self.game_over = True
         # Saves to gamehistory file
         with open('Gamehistory.json', 'w') as f:
             j.dump(self.data, f, indent=4)
+
+    def play_again(self):
+        '''Creates Play Again or Create New Account Button'''
+        if self.data['Player1']['Balance']>0:
+            # Creates play again button 
+                self.b_replay = Button(self.cards_frame, text='PLAY AGAIN', font='Arial 20 bold', fg='white', bg='#FFC300', command=lambda: self.open_window('Playing', 'Betting'))
+                self.b_replay.place(relx= 0.5, rely=0.5, anchor=CENTER)
+        else:
+            messagebox.showinfo('No Money','Account Balance = 0')
+            self.b_replay = Button(self.cards_frame, text='CREATE NEW ACCOUNT', font='Arial 20 bold', fg='white', bg='#FFC300', command=lambda: self.open_window('Playing', 'Betting'))
+            self.b_replay.place(relx= 0.5, rely=0.5, anchor=CENTER)
+            self.data['Player1']['Balance']=1000
+            self.save()
 
 app=Windows()
