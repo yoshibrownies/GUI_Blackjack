@@ -164,28 +164,44 @@ class Windows:
         self.cards_frame.pack(fill=BOTH, expand=True)
         
         # Player Cards & Score
-        self.l_player = Label(self.cards_frame, text=str(self.player_total), bg='green', font='Arial 15 bold', pady=10)
-        self.l_player.pack(side=BOTTOM)
+        self.l_player_total = Label(self.cards_frame, text=str(self.player_total), bg='green', font='Arial 15 bold', pady=10)
+        self.l_player_total.pack(side=BOTTOM)
         
-        self.l_player_card = Label(self.cards_frame, image=self.get_card_image(self.player_hand[0]))
-        self.l_player_card.pack(side=BOTTOM)
+        self.player_cards_frame = Frame(self.cards_frame, bg='white')
+        self.player_cards_frame.pack(side=BOTTOM)
 
-        self.l_player_card = Label(self.cards_frame, text=f'{self.player_hand[1].value} of {self.player_hand[1].suit}', bg='green')
-        self.l_player_card.pack(side=BOTTOM)
+        self.player_card_images = []
+        # Displaying player cards as images
+        for card in self.player_hand:
+            self.player_card_images.append(self.get_card_image(card))
+
+        self.l_player_card = Label(self.player_cards_frame, image=self.player_card_images[0], bg='green')
+        self.l_player_card.pack(side=LEFT)
+
+        self.l_player_card = Label(self.player_cards_frame, image=self.player_card_images[1], bg='green')
+        self.l_player_card.pack(side=LEFT)
 
         # Dealer Cards & Score
-        self.l_dealer = Label(self.cards_frame, text=str(self.dealer_total), bg='green', font='Arial 15 bold', pady=10)
-        self.l_dealer.pack(side=TOP)
+        self.l_dealer_total = Label(self.cards_frame, text=str(self.dealer_total), bg='green', font='Arial 15 bold', pady=10)
+        self.l_dealer_total.pack(side=TOP)
 
-        self.l_dealer_card = Label(self.cards_frame, text=f'{self.dealer_hand[0].value} of {self.dealer_hand[0].suit}', bg='green')
-        self.l_dealer_card.pack(side=TOP)
+        self.dealer_cards_frame = Frame(self.cards_frame, bg='white')
+        self.dealer_cards_frame.pack(side=TOP)
 
-    # Player Frame
-        self.player_frame = Frame(self.playing_frame, bg='green', height=100)
-        self.player_frame.pack(fill=X, side=BOTTOM)
+        self.dealer_card_images = []
+        # Displaying dealer cards as images
+        for card in self.dealer_hand:
+            self.dealer_card_images.append(self.get_card_image(card))
+
+        self.l_dealer_card = Label(self.dealer_cards_frame, image=self.dealer_card_images[0], bg='green')
+        self.l_dealer_card.pack(side=LEFT)
+
+    # Player Actions Frame
+        self.actions_frame = Frame(self.playing_frame, bg='green', height=100)
+        self.actions_frame.pack(fill=X, side=BOTTOM)
 
         # Align buttons to the right within the player frame
-        self.right_align = Frame(self.player_frame, bg='green')
+        self.right_align = Frame(self.actions_frame, bg='green')
         self.right_align.pack(side=RIGHT)
 
         self.b_hit = Button(self.right_align, text='HIT', font='Arial 20 bold', fg='white', bg='red', width=9, command=lambda: self.hit('Player'))
@@ -193,6 +209,7 @@ class Windows:
 
         self.b_stand = Button(self.right_align, text='STAND', font='Arial 20 bold', fg='white', bg='green', width=9, command=self.stand)
         self.b_stand.grid(column=0, row=0, padx=10, pady=5)
+
 
     def open_window(self, current_frame, window_name):
         '''Opens new frames and destroys previously open one'''
@@ -258,9 +275,13 @@ class Windows:
             if person == 'Player':
                 self.player_hand += self.deck.deal(1)
                 self.player_total = self.calculate_hand_value(self.player_hand)
-                self.l_player_card = Label(self.cards_frame, text=f'{self.player_hand[-1].value} of {self.player_hand[-1].suit}', bg='green')
-                self.l_player_card.pack(side=BOTTOM)
-                self.l_player.configure(text=str(self.player_total))
+
+                 # Displaying player cards as images
+                self.player_card_images.append(self.get_card_image(self.player_hand[-1]))
+                self.l_player_card = Label(self.player_cards_frame, image=self.player_card_images[-1], bg='green')
+                self.l_player_card.pack(side=LEFT)
+
+                self.l_player_total.configure(text=str(self.player_total))
                 if self.player_total > 21: # Checking if player busts
                     messagebox.showinfo("You Busted", f"-${self.bet_amount}")
                     self.data['Player1']['Balance'] -= self.bet_amount
@@ -273,9 +294,13 @@ class Windows:
         if person == 'Dealer':
             # Dealing & showing dealer hand
             self.dealer_hand += self.deck.deal(1)
-            self.l_dealer_card = Label(self.cards_frame, text=f'{self.dealer_hand[-1].value} of {self.dealer_hand[-1].suit}', bg='green')
-            self.l_dealer_card.pack(side=TOP)
-            self.l_dealer.configure(text=str(self.calculate_hand_value(self.dealer_hand)))
+
+            # Displaying dealer cards as images
+            self.dealer_card_images.append(self.get_card_image(self.dealer_hand[-1]))
+            self.l_dealer_card = Label(self.dealer_cards_frame, image=self.dealer_card_images[-1], bg='green')
+            self.l_dealer_card.pack(side=LEFT)
+
+            self.l_dealer_total.configure(text=str(self.calculate_hand_value(self.dealer_hand)))
 
     def stand(self):
         '''Deals dealer and determines who wins'''
@@ -330,14 +355,12 @@ class Windows:
     def get_card_image(self, card):
         '''Gets image for card'''
         try:
-            if card.value == 10:
+            if card.value == "10":
                 original_image = Image.open(f"PNG/10{card.suit[0]}.png")
-                print(card.value[0], card.suit[0])
             else:
                 original_image = Image.open(f"PNG/{card.value[0]}{card.suit[0]}.png")
-                print(card.value[0], card.suit[0])
             
-            original_image = original_image.resize((30, 45), Image.LANCZOS)
+            original_image = original_image.resize((50, 75), Image.LANCZOS)
             return ImageTk.PhotoImage(original_image)
         except FileNotFoundError:
             print('File not Found')
