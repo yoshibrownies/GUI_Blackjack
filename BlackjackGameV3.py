@@ -2,16 +2,11 @@ from tkinter import *
 from tkinter import messagebox
 import pydealer as pd
 import json as j
+from PIL import Image, ImageTk
 '''
-Version Two
-- Using 1 Class
-- Dealing
-Player Actions
-    - Hitting
-    - Standing
-    - Winning Conditions
-Json file tracking player balance
-Player bets
+Version Three
+- Error Proof
+- Images
 '''
 
 class Windows:
@@ -171,8 +166,8 @@ class Windows:
         # Player Cards & Score
         self.l_player = Label(self.cards_frame, text=str(self.player_total), bg='green', font='Arial 15 bold', pady=10)
         self.l_player.pack(side=BOTTOM)
-
-        self.l_player_card = Label(self.cards_frame, text=f'{self.player_hand[0].value} of {self.player_hand[0].suit}', bg='green')
+        
+        self.l_player_card = Label(self.cards_frame, image=self.get_card_image(self.player_hand[0]))
         self.l_player_card.pack(side=BOTTOM)
 
         self.l_player_card = Label(self.cards_frame, text=f'{self.player_hand[1].value} of {self.player_hand[1].suit}', bg='green')
@@ -331,5 +326,21 @@ class Windows:
             self.b_replay.place(relx= 0.5, rely=0.5, anchor=CENTER)
             self.data['Player1']['Balance']=1000
             self.save()
+
+    def get_card_image(self, card):
+        '''Gets image for card'''
+        try:
+            if card.value == 10:
+                original_image = Image.open(f"PNG/10{card.suit[0]}.png")
+                print(card.value[0], card.suit[0])
+            else:
+                original_image = Image.open(f"PNG/{card.value[0]}{card.suit[0]}.png")
+                print(card.value[0], card.suit[0])
+            
+            original_image = original_image.resize((30, 45), Image.LANCZOS)
+            return ImageTk.PhotoImage(original_image)
+        except FileNotFoundError:
+            print('File not Found')
+
 
 app=Windows()
