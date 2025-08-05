@@ -22,7 +22,8 @@ class Windows:
         # Main frame to hold everything
         self.main_frame = Frame(self.master, bg='white')
         self.main_frame.pack(fill=BOTH, expand=True)
-        self.create_menu_window()
+
+        self.create_profile_window()
         self.master.mainloop()
 
     def create_menu_window(self):
@@ -105,7 +106,7 @@ class Windows:
         self.betting_frame=Frame(self.main_frame)
         self.betting_frame.pack(fill=BOTH, expand=True)
 
-        self.l_balance = Label(self.betting_frame, text=f"Balance: ${self.data['Player1']['Balance']}", font='Arial 20 bold')
+        self.l_balance = Label(self.betting_frame, text=f"Balance: ${self.data[self.profile]['Balance']}", font='Arial 20 bold')
         self.l_balance.pack(side=TOP, fill=X, pady=10)
 
         # Creates a frame to centre betting amount
@@ -136,7 +137,7 @@ class Windows:
         self.playing_frame=Frame(self.main_frame)
         self.playing_frame.pack(fill=BOTH, expand=True)
         
-        # Crating and shuffling Deck
+        # Creating and shuffling Deck
         self.deck=pd.Deck()
         self.deck.shuffle()
 
@@ -210,15 +211,70 @@ class Windows:
         self.b_stand = Button(self.right_align, text='STAND', font='Arial 20 bold', fg='white', bg='green', width=9, command=self.stand)
         self.b_stand.grid(column=0, row=0, padx=10, pady=5)
 
+    def create_profile_window(self):
+            '''Creates profile frame'''
+            self.profile = 'Player1'
+            self.profile_frame = Frame(self.main_frame)
+            self.profile_frame.pack(fill=BOTH, expand=True)
+
+            self.l_title = Label(self.profile_frame, text='Profiles', font='Arial 40 bold', pady=30)
+            self.l_title.pack(side=TOP)
+
+            self.center_frame = Frame(self.profile_frame, bg='purple')
+            self.center_frame.pack(fill=X, side=LEFT)
+
+            selected_option = StringVar()
+
+            # Loops through all profiles
+            for key, value in self.data.items():
+                self.individual_profile = Frame(self.center_frame)
+                self.individual_profile.pack(side=LEFT, padx=65)
+
+                self.individual_profile.rowconfigure([0,1,2,3], minsize=10)
+
+                self.l_title = Label(self.individual_profile, text=key, font='Arial 20 bold')
+                self.l_title.grid(columnspan=2, row=0)
+
+                self.l_balance = Label(self.individual_profile, text='Balance:')
+                self.l_balance.grid(column=0, row=2)
+
+                self.l_balance_amount = Label(self.individual_profile, text=f'${value["Balance"]}')
+                self.l_balance_amount.grid(column=1, row=2)
+
+                self.l_wins = Label(self.individual_profile, text='Wins:')
+                self.l_wins.grid(column=0, row=3)
+
+                self.l_wins_amount = Label(self.individual_profile, text=value["Wins"], fg='green')
+                self.l_wins_amount.grid(column=1, row=3)
+
+                self.l_losses = Label(self.individual_profile, text='Losses:')
+                self.l_losses.grid(column=0, row=4)
+
+                self.l_losses_amount = Label(self.individual_profile, text=value["Losses"], fg='red')
+                self.l_losses_amount.grid(column=1, row=4)
+
+                self.radio = Radiobutton(self.individual_profile, variable=selected_option, value=key)
+                self.radio.grid(columnspan=2, row=5)
+            
+            self.profiles = list(self.data.keys())
+            selected_option.set(self.profiles[0]) # Sets first profile as default
+
+            self.b_play = Button(self.profile_frame, text='PLAY', font='Arial 20 bold', fg='white', bg='#FFC300', width=9)
+            self.b_play.pack(side=BOTTOM)
 
     def open_window(self, current_frame, window_name):
         '''Opens new frames and destroys previously open one'''
+
+        current_frame.title()
+        window_name.title()
 
         # Destroys Open frame
         if current_frame == 'Menu':
             self.menu_frame.destroy()
         elif current_frame == 'Help':
             self.help_frame.destroy()
+        elif current_frame == 'Profile':
+            self.profile_frame.destroy()
         elif current_frame == 'Betting':
             try: # Avoiding value error from empty bet amount entry box
                 self.bet_amount = int(self.e_bet_amount.get())
@@ -237,11 +293,13 @@ class Windows:
             self.create_betting_window()
         elif window_name == 'Playing':
             self.create_playing_window()
+        elif window_name == 'Profile':
+            self.create_profile_window
     
     def bet (self):
         '''Checks Betting amount is valid and opens window if so'''
         try:
-            if int(self.e_bet_amount.get())>self.data['Player1']['Balance']:
+            if int(self.e_bet_amount.get())>self.data[self.profile]['Balance']:
                 messagebox.showerror('Error', 'Bet is higher than your balance. Enter lower bet.')
             elif int(self.e_bet_amount.get())<=0:
                 messagebox.showerror('Error', 'Bet must be greater than 0.')
@@ -284,7 +342,7 @@ class Windows:
                 self.l_player_total.configure(text=str(self.player_total))
                 if self.player_total > 21: # Checking if player busts
                     messagebox.showinfo("You Busted", f"-${self.bet_amount}")
-                    self.data['Player1']['Balance'] -= self.bet_amount
+                    self.win_or_loss('Loss')
                     self.save()
                     # Creates play again button
                     self.play_again()
@@ -302,6 +360,16 @@ class Windows:
 
             self.l_dealer_total.configure(text=str(self.calculate_hand_value(self.dealer_hand)))
 
+    def win_or_loss(self, outcome):
+        '''Adds or removes bet amount to profile balance'''
+        outcome.title()
+        if outcome == 'Loss':
+            self.data[self.profile]['Balance'] -= self.bet_amount
+            self.data[self.profile]['Losses'] += 1
+        elif outcome == 'Win':
+            self.data[self.profile]['Balance'] += self.bet_amount
+            self.data[self.profile]['Wins'] += 1
+
     def stand(self):
         '''Deals dealer and determines who wins'''
 
@@ -312,20 +380,20 @@ class Windows:
             self.dealer_total = self.calculate_hand_value(self.dealer_hand) 
 
             # Winning Conditions
-            if self.dealer_total > 21:
+            if self.player_total < self.dealer_total:
+                messagebox.showinfo(f"You Lose", f"-${self.bet_amount}")
+                self.win_or_loss('Loss')
+                self.save()
+            elif self.player_total > self.dealer_total:
+                messagebox.showinfo(f"You Win", f"+${self.bet_amount}")
+                self.win_or_loss('Win')
+                self.save()
+            elif self.dealer_total > 21:
                 messagebox.showinfo("Dealer Busted", f"+${self.bet_amount}")
-                self.data['Player1']['Balance'] += self.bet_amount
+                self.win_or_loss('Win')
                 self.save()
             elif self.player_total == self.dealer_total:
                 messagebox.showinfo("Push", f"+$0")
-            elif self.player_total > self.dealer_total:
-                messagebox.showinfo(f"You Win", f"+${self.bet_amount}")
-                self.data['Player1']['Balance'] += self.bet_amount
-                self.save()
-            elif self.player_total < self.dealer_total:
-                messagebox.showinfo(f"You Lose", f"-${self.bet_amount}")
-                self.data['Player1']['Balance'] -= self.bet_amount
-                self.save()
 
             # Creates play again button 
             self.play_again()
@@ -341,7 +409,7 @@ class Windows:
 
     def play_again(self):
         '''Creates Play Again or Create New Account Button'''
-        if self.data['Player1']['Balance']>0:
+        if self.data[self.profile]['Balance']>0:
             # Creates play again button 
                 self.b_replay = Button(self.cards_frame, text='PLAY AGAIN', font='Arial 20 bold', fg='white', bg='#FFC300', command=lambda: self.open_window('Playing', 'Betting'))
                 self.b_replay.place(relx= 0.5, rely=0.5, anchor=CENTER)
@@ -349,7 +417,7 @@ class Windows:
             messagebox.showinfo('No Money','Account Balance = 0')
             self.b_replay = Button(self.cards_frame, text='CREATE NEW ACCOUNT', font='Arial 20 bold', fg='white', bg='#FFC300', command=lambda: self.open_window('Playing', 'Betting'))
             self.b_replay.place(relx= 0.5, rely=0.5, anchor=CENTER)
-            self.data['Player1']['Balance']=1000
+            self.data[self.profile]['Balance']=1000
             self.save()
 
     def get_card_image(self, card):
