@@ -20,10 +20,13 @@ class Windows:
             self.data = j.load(f)
 
         # Main frame to hold everything
-        self.main_frame = Frame(self.master, bg='white')
+        self.main_frame = Frame(self.master)
         self.main_frame.pack(fill=BOTH, expand=True)
 
-        self.create_profile_window()
+        self.BUTTON_FONT = 'Arial 20 bold'
+        self.YELLOW = '#FFC300'
+
+        self.create_menu_window()
         self.master.mainloop()
 
     def create_menu_window(self):
@@ -43,10 +46,10 @@ class Windows:
 
         
         # Buttons
-        self.b_play = Button(self.button_frame, text='PLAY', font='Arial 20 bold', fg='white', bg='#FFC300', width=9, command=lambda: self.open_window('Menu', 'Betting'))
+        self.b_play = Button(self.button_frame, text='PLAY', font=self.BUTTON_FONT, fg='white', bg=self.YELLOW, width=9, command=lambda: self.open_window('Menu', 'Profile'))
         self.b_play.pack(side=LEFT, padx=30)
 
-        self.b_help = Button(self.button_frame, text='HELP', font='Arial 20 bold', fg='white', bg='#FFC300', width=9, command=lambda: self.open_window('Menu', 'Help'))
+        self.b_help = Button(self.button_frame, text='HELP', font=self.BUTTON_FONT, fg='white', bg=self.YELLOW, width=9, command=lambda: self.open_window('Menu', 'Help'))
         self.b_help.pack(side=LEFT, padx=30)
 
     def create_help_window(self):
@@ -98,7 +101,7 @@ class Windows:
         self.l_winning_description.grid(row=5, column=1, padx=10)
 
         # Back Button
-        self.b_back = Button(self.help_frame, text='BACK', font='Arial 20 bold', fg='white', bg='#FFC300', width=9, command=lambda: self.open_window('Help', 'Menu'))
+        self.b_back = Button(self.help_frame, text='BACK', font=self.BUTTON_FONT, fg='white', bg=self.YELLOW, width=9, command=lambda: self.open_window('Help', 'Menu'))
         self.b_back.grid(row=7, column=1, padx=30)
     
     def create_betting_window(self):
@@ -106,7 +109,7 @@ class Windows:
         self.betting_frame=Frame(self.main_frame)
         self.betting_frame.pack(fill=BOTH, expand=True)
 
-        self.l_balance = Label(self.betting_frame, text=f"Balance: ${self.data[self.profile]['Balance']}", font='Arial 20 bold')
+        self.l_balance = Label(self.betting_frame, text=f"Balance: ${self.data[self.profile.get()]['Balance']}", font=self.BUTTON_FONT)
         self.l_balance.pack(side=TOP, fill=X, pady=10)
 
         # Creates a frame to centre betting amount
@@ -124,10 +127,10 @@ class Windows:
         self.button_frame = Frame(self.betting_frame)
         self.button_frame.pack(side=BOTTOM, pady=20)
 
-        self.b_bet = Button(self.button_frame, text='BET', font='Arial 20 bold', fg='white', bg='green', width=9, command=self.bet)
+        self.b_bet = Button(self.button_frame, text='BET', font=self.BUTTON_FONT, fg='white', bg='green', width=9, command=self.bet)
         self.b_bet.pack(side=LEFT, padx=30)
 
-        self.b_back = Button(self.button_frame, text='BACK', font='Arial 20 bold', fg='white', bg='red', width=9, command=lambda: self.open_window('Betting','Menu'))
+        self.b_back = Button(self.button_frame, text='BACK', font=self.BUTTON_FONT, fg='white', bg='red', width=9, command=lambda: self.open_window('Betting','Menu'))
         self.b_back.pack(side=LEFT, padx=30)
 
     
@@ -205,30 +208,36 @@ class Windows:
         self.right_align = Frame(self.actions_frame, bg='green')
         self.right_align.pack(side=RIGHT)
 
-        self.b_hit = Button(self.right_align, text='HIT', font='Arial 20 bold', fg='white', bg='red', width=9, command=lambda: self.hit('Player'))
+        self.b_hit = Button(self.right_align, text='HIT', font=self.BUTTON_FONT, fg='white', bg='red', width=9, command=lambda: self.hit('Player'))
         self.b_hit.grid(column=1, row=0, padx=10, pady=5)
 
-        self.b_stand = Button(self.right_align, text='STAND', font='Arial 20 bold', fg='white', bg='green', width=9, command=self.stand)
+        self.b_stand = Button(self.right_align, text='STAND', font=self.BUTTON_FONT, fg='white', bg='green', width=9, command=self.stand)
         self.b_stand.grid(column=0, row=0, padx=10, pady=5)
 
     def create_profile_window(self):
             '''Creates profile frame'''
-            self.profile = 'Player1'
             self.profile_frame = Frame(self.main_frame)
             self.profile_frame.pack(fill=BOTH, expand=True)
 
             self.l_title = Label(self.profile_frame, text='Profiles', font='Arial 40 bold', pady=30)
             self.l_title.pack(side=TOP)
 
-            self.center_frame = Frame(self.profile_frame, bg='purple')
-            self.center_frame.pack(fill=X, side=LEFT)
+            self.profile = StringVar()
 
-            selected_option = StringVar()
+            self.l_current = Label(self.profile_frame, text='Selected Profile:', font='Arial 10')
+            self.l_current.pack(side=TOP)
+
+            self.l_current_profile = Label(self.profile_frame, textvariable=self.profile, font='Arial 10 bold', fg='green')
+            self.l_current_profile.pack(side=TOP)
+
+            # Centering 
+            self.center_frame = Frame(self.profile_frame)
+            self.center_frame.pack(fill=X, side=TOP, pady=40)
 
             # Loops through all profiles
             for key, value in self.data.items():
-                self.individual_profile = Frame(self.center_frame)
-                self.individual_profile.pack(side=LEFT, padx=65)
+                self.individual_profile = Frame(self.center_frame, padx=65,)
+                self.individual_profile.pack(side=LEFT)
 
                 self.individual_profile.rowconfigure([0,1,2,3], minsize=10)
 
@@ -253,15 +262,14 @@ class Windows:
                 self.l_losses_amount = Label(self.individual_profile, text=value["Losses"], fg='red')
                 self.l_losses_amount.grid(column=1, row=4)
 
-                self.radio = Radiobutton(self.individual_profile, variable=selected_option, value=key)
+                self.radio = Radiobutton(self.individual_profile, variable=self.profile, value=key)
                 self.radio.grid(columnspan=2, row=5)
             
             self.profiles = list(self.data.keys())
-            selected_option.set(self.profiles[0]) # Sets first profile as default
+            self.profile.set(self.profiles[0]) # Sets first profile as default
 
-            self.b_play = Button(self.profile_frame, text='PLAY', font='Arial 20 bold', fg='white', bg='#FFC300', width=9)
-            self.b_play.pack(side=BOTTOM)
-
+            self.b_play = Button(self.profile_frame, text='PLAY', font=self.BUTTON_FONT, fg='white', bg=self.YELLOW, width=9, command=lambda: self.open_window('Profile','Betting'))
+            self.b_play.pack(side=TOP)
     def open_window(self, current_frame, window_name):
         '''Opens new frames and destroys previously open one'''
 
@@ -294,12 +302,12 @@ class Windows:
         elif window_name == 'Playing':
             self.create_playing_window()
         elif window_name == 'Profile':
-            self.create_profile_window
+            self.create_profile_window()
     
     def bet (self):
         '''Checks Betting amount is valid and opens window if so'''
         try:
-            if int(self.e_bet_amount.get())>self.data[self.profile]['Balance']:
+            if int(self.e_bet_amount.get())>self.data[self.profile.get()]['Balance']:
                 messagebox.showerror('Error', 'Bet is higher than your balance. Enter lower bet.')
             elif int(self.e_bet_amount.get())<=0:
                 messagebox.showerror('Error', 'Bet must be greater than 0.')
@@ -364,11 +372,11 @@ class Windows:
         '''Adds or removes bet amount to profile balance'''
         outcome.title()
         if outcome == 'Loss':
-            self.data[self.profile]['Balance'] -= self.bet_amount
-            self.data[self.profile]['Losses'] += 1
+            self.data[self.profile.get()]['Balance'] -= self.bet_amount
+            self.data[self.profile.get()]['Losses'] += 1
         elif outcome == 'Win':
-            self.data[self.profile]['Balance'] += self.bet_amount
-            self.data[self.profile]['Wins'] += 1
+            self.data[self.profile.get()]['Balance'] += self.bet_amount
+            self.data[self.profile.get()]['Wins'] += 1
 
     def stand(self):
         '''Deals dealer and determines who wins'''
@@ -409,15 +417,15 @@ class Windows:
 
     def play_again(self):
         '''Creates Play Again or Create New Account Button'''
-        if self.data[self.profile]['Balance']>0:
+        if self.data[self.profile.get()]['Balance']>0:
             # Creates play again button 
-                self.b_replay = Button(self.cards_frame, text='PLAY AGAIN', font='Arial 20 bold', fg='white', bg='#FFC300', command=lambda: self.open_window('Playing', 'Betting'))
+                self.b_replay = Button(self.cards_frame, text='PLAY AGAIN', font=self.BUTTON_FONT, fg='white', bg=self.YELLOW, command=lambda: self.open_window('Playing', 'Betting'))
                 self.b_replay.place(relx= 0.5, rely=0.5, anchor=CENTER)
         else:
             messagebox.showinfo('No Money','Account Balance = 0')
-            self.b_replay = Button(self.cards_frame, text='CREATE NEW ACCOUNT', font='Arial 20 bold', fg='white', bg='#FFC300', command=lambda: self.open_window('Playing', 'Betting'))
+            self.b_replay = Button(self.cards_frame, text='CREATE NEW ACCOUNT', font=self.BUTTON_FONT, fg='white', bg=self.YELLOW, command=lambda: self.open_window('Playing', 'Betting'))
             self.b_replay.place(relx= 0.5, rely=0.5, anchor=CENTER)
-            self.data[self.profile]['Balance']=1000
+            self.data[self.profile.get()]['Balance']=1000
             self.save()
 
     def get_card_image(self, card):
@@ -432,6 +440,5 @@ class Windows:
             return ImageTk.PhotoImage(original_image)
         except FileNotFoundError:
             print('File not Found')
-
 
 app=Windows()
