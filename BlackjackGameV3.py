@@ -388,16 +388,16 @@ class Windows:
             self.dealer_total = self.calculate_hand_value(self.dealer_hand) 
 
             # Winning Conditions
-            if self.player_total < self.dealer_total:
+            if self.dealer_total > 21:
+                messagebox.showinfo("Dealer Busted", f"+${self.bet_amount}")
+                self.win_or_loss('Win')
+                self.save()
+            elif self.player_total < self.dealer_total:
                 messagebox.showinfo(f"You Lose", f"-${self.bet_amount}")
                 self.win_or_loss('Loss')
                 self.save()
             elif self.player_total > self.dealer_total:
                 messagebox.showinfo(f"You Win", f"+${self.bet_amount}")
-                self.win_or_loss('Win')
-                self.save()
-            elif self.dealer_total > 21:
-                messagebox.showinfo("Dealer Busted", f"+${self.bet_amount}")
                 self.win_or_loss('Win')
                 self.save()
             elif self.player_total == self.dealer_total:
