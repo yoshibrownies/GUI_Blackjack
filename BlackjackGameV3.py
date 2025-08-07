@@ -422,10 +422,13 @@ class Windows:
                 self.b_replay = Button(self.cards_frame, text='PLAY AGAIN', font=self.BUTTON_FONT, fg='white', bg=self.YELLOW, command=lambda: self.open_window('Playing', 'Betting'))
                 self.b_replay.place(relx= 0.5, rely=0.5, anchor=CENTER)
         else:
+            # Resets profile
             messagebox.showinfo('No Money','Account Balance = 0')
             self.b_replay = Button(self.cards_frame, text='CREATE NEW ACCOUNT', font=self.BUTTON_FONT, fg='white', bg=self.YELLOW, command=lambda: self.open_window('Playing', 'Betting'))
             self.b_replay.place(relx= 0.5, rely=0.5, anchor=CENTER)
-            self.data[self.profile.get()]['Balance']=1000
+            self.data[self.profile.get()]['Balance'] = 1000
+            self.data[self.profile.get()]['Wins'] = 0
+            self.data[self.profile.get()]['Losses'] = 0
             self.save()
 
     def get_card_image(self, card):
