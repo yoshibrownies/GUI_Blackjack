@@ -54,54 +54,58 @@ class Windows:
 
     def create_help_window(self):
         '''Creates help frame'''
-        self.help_frame=Frame(self.main_frame)
+        self.help_frame = Frame(self.main_frame)
         self.help_frame.pack(fill=BOTH, expand=True)
         TITLE_STYLE = 'Arial 15 bold'
 
+        # Centering all information
+        self.center_frame = Frame(self.help_frame)
+        self.center_frame.pack(side=TOP)
+
         # Header
-        self.l_title = Label(self.help_frame, text='How To Play', font='Arial 35 bold', justify=CENTER)
+        self.l_title = Label(self.center_frame, text='How To Play', font='Arial 35 bold', justify=CENTER)
         self.l_title.grid(row=0, columnspan=2)
         
-        self.l_description = Label(self.help_frame, text='Objective: Beat the dealer by getting a hand value as close to 21 as possible without going over.\n')
-        self.l_description.grid(row=1, columnspan=2, ipadx=10)
+        self.l_description = Label(self.center_frame, text='Objective: Beat the dealer by getting a hand value as close to 21 as possible without going over.\n')
+        self.l_description.grid(row=1, columnspan=2)
 
         # Card Values
-        self.l_cardvalues = Label(self.help_frame, font=TITLE_STYLE, text='Card Values')
+        self.l_cardvalues = Label(self.center_frame, font=TITLE_STYLE, text='Card Values')
         self.l_cardvalues.grid(row=2, column=0, padx=10)
 
-        self.l_cardvalues_description = Label(self.help_frame, text='Number Cards (2-10): Face Value\nFace Cards (King, Queen, Jack): Worth 10\nAces: Worth 1 or 11\n')
+        self.l_cardvalues_description = Label(self.center_frame, text='Number Cards (2-10): Face Value\nFace Cards (King, Queen, Jack): Worth 10\nAces: Worth 1 or 11\n')
         self.l_cardvalues_description.grid(row=3, column=0, padx=10)
 
         # Game Setup
-        self.l_gamesetup = Label(self.help_frame, font=TITLE_STYLE, text='Game Setup')
+        self.l_gamesetup = Label(self.center_frame, font=TITLE_STYLE, text='Game Setup')
         self.l_gamesetup.grid(row=4, column=0, padx=10)
 
-        self.l_gamesetup_description = Label(self.help_frame, text='1. You place a bet\n2. You and the dealer get two cards\n(your cards face up, dealer has one \nface up and one face down)\n')
+        self.l_gamesetup_description = Label(self.center_frame, text='1. You place a bet\n2. You and the dealer get two cards\n(your cards face up, dealer has one \nface up and one face down)\n')
         self.l_gamesetup_description.grid(row=5, column=0, padx=10)
 
         # Player Actions
-        self.l_playeractions = Label(self.help_frame, font=TITLE_STYLE, text='Player Actions')
+        self.l_playeractions = Label(self.center_frame, font=TITLE_STYLE, text='Player Actions')
         self.l_playeractions.grid(row=6, column=0, padx=10)
 
-        self.l_playeractions_description = Label(self.help_frame, text='Hit: Take another card\nStand: Keep your current hand\nDouble Down: Double your bet and take \none more card\nSplit: If you have two cards of the same value, \nsplit them into two hands for an additional bet\n')
+        self.l_playeractions_description = Label(self.center_frame, text='Hit: Take another card\nStand: Keep your current hand\nDouble Down: Double your bet and take \none more card\nSplit: If you have two cards of the same value, \nsplit them into two hands for an additional bet\n')
         self.l_playeractions_description.grid(row=7, column=0, padx=10)
 
         # Dealer's Turn
-        self.l_dealerturn = Label(self.help_frame, font=TITLE_STYLE, text="Dealer's Turn")
+        self.l_dealerturn = Label(self.center_frame, font=TITLE_STYLE, text="Dealer's Turn")
         self.l_dealerturn.grid(row=2, column=1, padx=10)
 
-        self.l_dealerturn_description = Label(self.help_frame, text='The dealer reveals their hole card and \nmust hit until reaching 17 or higher.\n')
+        self.l_dealerturn_description = Label(self.center_frame, text='The dealer reveals their hole card and \nmust hit until reaching 17 or higher.\n')
         self.l_dealerturn_description.grid(row=3, column=1, padx=10)
 
         # Winning
-        self.l_winning = Label(self.help_frame, font=TITLE_STYLE, text='Winning')
+        self.l_winning = Label(self.center_frame, font=TITLE_STYLE, text='Winning')
         self.l_winning.grid(row=4, column=1, padx=10)
 
-        self.l_winning_description = Label(self.help_frame, text="1. If your hand exceeds 21, you bust and lose\n2. If the dealer busts, remaining players win\n3. If your hand is closer to 21 than the dealer's,\n you win (payout is typically 1:1)\n4. A blackjack (Ace + 10-value card) usually pays 3:2\n5. A tie results in a push, and you get your bet back")
+        self.l_winning_description = Label(self.center_frame, text="1. If your hand exceeds 21, you bust and lose\n2. If the dealer busts, remaining players win\n3. If your hand is closer to 21 than the dealer's,\n you win (payout is typically 1:1)\n4. A blackjack (Ace + 10-value card) usually pays 3:2\n5. A tie results in a push, and you get your bet back")
         self.l_winning_description.grid(row=5, column=1, padx=10)
 
         # Back Button
-        self.b_back = Button(self.help_frame, text='BACK', font=self.BUTTON_FONT, fg='white', bg='red', width=9, command=lambda: self.open_window('Help', 'Menu'))
+        self.b_back = Button(self.center_frame, text='BACK', font=self.BUTTON_FONT, fg='white', bg='red', width=9, command=lambda: self.open_window('Help', 'Menu'))
         self.b_back.grid(row=7, column=1, padx=30)
     
     def create_betting_window(self):
