@@ -268,8 +268,14 @@ class Windows:
             self.profiles = list(self.data.keys())
             self.profile.set(self.profiles[0]) # Sets first profile as default
 
-            self.b_play = Button(self.profile_frame, text='PLAY', font=self.BUTTON_FONT, fg='white', bg=self.YELLOW, width=9, command=lambda: self.open_window('Profile','Betting'))
-            self.b_play.pack(side=TOP)
+            self.button_frame = Frame(self.profile_frame)
+            self.button_frame.pack(side=TOP)
+
+            self.b_back = Button(self.button_frame, text='BACK', font=self.BUTTON_FONT, fg='white', bg='red', width=9, command=lambda: self.open_window('Profile', 'Menu'))
+            self.b_back.pack(side=LEFT, padx=30)
+
+            self.b_play = Button(self.button_frame, text='PLAY', font=self.BUTTON_FONT, fg='white', bg=self.YELLOW, width=9, command=lambda: self.open_window('Profile','Betting'))
+            self.b_play.pack(side=LEFT, padx=30)
     def open_window(self, current_frame, window_name):
         '''Opens new frames and destroys previously open one'''
 
