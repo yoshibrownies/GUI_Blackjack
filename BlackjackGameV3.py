@@ -436,7 +436,7 @@ class Windows:
             else:
                 original_image = Image.open(f"PNG/{card.value[0]}{card.suit[0]}.png")
             
-            original_image = original_image.resize((50, 75), Image.LANCZOS)
+            original_image = original_image.resize((70, 105), Image.LANCZOS)
             return ImageTk.PhotoImage(original_image)
         except FileNotFoundError:
             print('File not Found')
