@@ -101,7 +101,7 @@ class Windows:
         self.l_winning_description.grid(row=5, column=1, padx=10)
 
         # Back Button
-        self.b_back = Button(self.help_frame, text='BACK', font=self.BUTTON_FONT, fg='white', bg=self.YELLOW, width=9, command=lambda: self.open_window('Help', 'Menu'))
+        self.b_back = Button(self.help_frame, text='BACK', font=self.BUTTON_FONT, fg='white', bg='red', width=9, command=lambda: self.open_window('Help', 'Menu'))
         self.b_back.grid(row=7, column=1, padx=30)
     
     def create_betting_window(self):
@@ -127,16 +127,14 @@ class Windows:
         self.button_frame = Frame(self.betting_frame)
         self.button_frame.pack(side=BOTTOM, pady=20)
 
-        self.b_bet = Button(self.button_frame, text='BET', font=self.BUTTON_FONT, fg='white', bg='green', width=9, command=self.bet)
-        self.b_bet.pack(side=LEFT, padx=30)
-
         self.b_back = Button(self.button_frame, text='BACK', font=self.BUTTON_FONT, fg='white', bg='red', width=9, command=lambda: self.open_window('Betting','Menu'))
         self.b_back.pack(side=LEFT, padx=30)
 
+        self.b_bet = Button(self.button_frame, text='BET', font=self.BUTTON_FONT, fg='white', bg='green', width=9, command=self.bet)
+        self.b_bet.pack(side=LEFT, padx=30)
     
     def create_playing_window(self):
         '''Creates playing frame'''
-        self.game_over = False
         self.playing_frame=Frame(self.main_frame)
         self.playing_frame.pack(fill=BOTH, expand=True)
         
@@ -274,7 +272,7 @@ class Windows:
             self.b_back = Button(self.button_frame, text='BACK', font=self.BUTTON_FONT, fg='white', bg='red', width=9, command=lambda: self.open_window('Profile', 'Menu'))
             self.b_back.pack(side=LEFT, padx=30)
 
-            self.b_play = Button(self.button_frame, text='PLAY', font=self.BUTTON_FONT, fg='white', bg=self.YELLOW, width=9, command=lambda: self.open_window('Profile','Betting'))
+            self.b_play = Button(self.button_frame, text='PLAY', font=self.BUTTON_FONT, fg='white', bg='green', width=9, command=lambda: self.open_window('Profile','Betting'))
             self.b_play.pack(side=LEFT, padx=30)
     def open_window(self, current_frame, window_name):
         '''Opens new frames and destroys previously open one'''
@@ -343,27 +341,24 @@ class Windows:
     
     def hit(self, person):
         '''Deals another card to hand'''
-        if self.game_over == False:
-            if person == 'Player':
-                self.player_hand += self.deck.deal(1)
-                self.player_total = self.calculate_hand_value(self.player_hand)
+        if person == 'Player':
+            self.player_hand += self.deck.deal(1)
+            self.player_total = self.calculate_hand_value(self.player_hand)
 
-                 # Displaying player cards as images
-                self.player_card_images.append(self.get_card_image(self.player_hand[-1]))
-                self.l_player_card = Label(self.player_cards_frame, image=self.player_card_images[-1], bg='green')
-                self.l_player_card.pack(side=LEFT)
+                # Displaying player cards as images
+            self.player_card_images.append(self.get_card_image(self.player_hand[-1]))
+            self.l_player_card = Label(self.player_cards_frame, image=self.player_card_images[-1], bg='green')
+            self.l_player_card.pack(side=LEFT)
 
-                self.l_player_total.configure(text=str(self.player_total))
-                if self.player_total > 21: # Checking if player busts
-                    messagebox.showinfo("You Busted", f"-${self.bet_amount}")
-                    self.win_or_loss('Loss')
-                    self.save()
-                    # Creates play again button
-                    self.play_again()
-        else:
-            messagebox.showerror("Error", "You cannot hit again. Game is over.")
+            self.l_player_total.configure(text=str(self.player_total))
+            if self.player_total > 21: # Checking if player busts
+                messagebox.showinfo("You Busted", f"-${self.bet_amount}")
+                self.win_or_loss('Loss')
+                self.save()
+                # Creates play again button
+                self.play_again()
 
-        if person == 'Dealer':
+        elif person == 'Dealer':
             # Dealing & showing dealer hand
             self.dealer_hand += self.deck.deal(1)
 
@@ -386,37 +381,32 @@ class Windows:
 
     def stand(self):
         '''Deals dealer and determines who wins'''
+        while self.calculate_hand_value(self.dealer_hand)<17: # Hits dealer until above 16
+            self.hit('Dealer')
+        self.player_total = self.calculate_hand_value(self.player_hand)
+        self.dealer_total = self.calculate_hand_value(self.dealer_hand) 
 
-        if self.game_over==False: # If game is already over, user cannot stand again
-            while self.calculate_hand_value(self.dealer_hand)<17: # Hits dealer until above 16
-                self.hit('Dealer')
-            self.player_total = self.calculate_hand_value(self.player_hand)
-            self.dealer_total = self.calculate_hand_value(self.dealer_hand) 
+        # Winning Conditions
+        if self.dealer_total > 21:
+            messagebox.showinfo("Dealer Busted", f"+${self.bet_amount}")
+            self.win_or_loss('Win')
+            self.save()
+        elif self.player_total < self.dealer_total:
+            messagebox.showinfo(f"You Lose", f"-${self.bet_amount}")
+            self.win_or_loss('Loss')
+            self.save()
+        elif self.player_total > self.dealer_total:
+            messagebox.showinfo(f"You Win", f"+${self.bet_amount}")
+            self.win_or_loss('Win')
+            self.save()
+        elif self.player_total == self.dealer_total:
+            messagebox.showinfo("Push", f"+$0")
 
-            # Winning Conditions
-            if self.dealer_total > 21:
-                messagebox.showinfo("Dealer Busted", f"+${self.bet_amount}")
-                self.win_or_loss('Win')
-                self.save()
-            elif self.player_total < self.dealer_total:
-                messagebox.showinfo(f"You Lose", f"-${self.bet_amount}")
-                self.win_or_loss('Loss')
-                self.save()
-            elif self.player_total > self.dealer_total:
-                messagebox.showinfo(f"You Win", f"+${self.bet_amount}")
-                self.win_or_loss('Win')
-                self.save()
-            elif self.player_total == self.dealer_total:
-                messagebox.showinfo("Push", f"+$0")
-
-            # Creates play again button 
-            self.play_again()
-        else:
-            messagebox.showerror("Error", "You cannot stand again. Game is over.")
+        # Creates play again button 
+        self.play_again()
     
     def save(self):
         '''Saves data'''
-        self.game_over = True
         # Saves to gamehistory file
         with open('Gamehistory.json', 'w') as f:
             j.dump(self.data, f, indent=4)
@@ -436,6 +426,10 @@ class Windows:
             self.data[self.profile.get()]['Wins'] = 0
             self.data[self.profile.get()]['Losses'] = 0
             self.save()
+
+        self.right_align.destroy()
+        self.b_menu = Button(self.actions_frame, text='MENU', font=self.BUTTON_FONT, fg='white', bg='red', width=9, command=lambda: self.open_window('Playing', 'Menu'))
+        self.b_menu.pack(pady=10)
 
     def get_card_image(self, card):
         '''Gets image for card'''
