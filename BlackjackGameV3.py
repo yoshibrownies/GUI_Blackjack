@@ -358,7 +358,6 @@ class Windows:
             if self.player_total > 21: # Checking if player busts
                 messagebox.showinfo("You Busted", f"-${self.bet_amount}")
                 self.win_or_loss('Loss')
-                self.save()
                 # Creates play again button
                 self.play_again()
 
@@ -382,6 +381,8 @@ class Windows:
         elif outcome == 'Win':
             self.data[self.profile.get()]['Balance'] += self.bet_amount
             self.data[self.profile.get()]['Wins'] += 1
+        self.data[self.profile.get()]['Games']+=1
+        self.save()
 
     def stand(self):
         '''Deals dealer and determines who wins'''
@@ -394,18 +395,15 @@ class Windows:
         if self.dealer_total > 21:
             messagebox.showinfo("Dealer Busted", f"+${self.bet_amount}")
             self.win_or_loss('Win')
-            self.save()
         elif self.player_total < self.dealer_total:
             messagebox.showinfo(f"You Lose", f"-${self.bet_amount}")
             self.win_or_loss('Loss')
-            self.save()
         elif self.player_total > self.dealer_total:
             messagebox.showinfo(f"You Win", f"+${self.bet_amount}")
             self.win_or_loss('Win')
-            self.save()
         elif self.player_total == self.dealer_total:
             messagebox.showinfo("Push", f"+$0")
-
+            self.win_or_loss('Push')
         # Creates play again button 
         self.play_again()
     
