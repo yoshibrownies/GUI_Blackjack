@@ -264,8 +264,20 @@ class Windows:
                 self.l_losses_amount = Label(self.individual_profile, text=value["Losses"], fg='red')
                 self.l_losses_amount.grid(column=1, row=4)
 
+                self.l_winrate = Label(self.individual_profile, text='Winrate:')
+                self.l_winrate.grid(column=0, row=5)
+                
+                # Calculating winrate
+                if value["Games"]>0:
+                    winrate_percent = value["Wins"]/value["Games"]*100
+                else:
+                    winrate_percent = 0
+
+                self.l_winrate_number = Label(self.individual_profile, text=f'{round(winrate_percent, 1)}%', fg='blue')
+                self.l_winrate_number.grid(column=1, row=5)
+
                 self.radio = Radiobutton(self.individual_profile, variable=self.profile, value=key)
-                self.radio.grid(columnspan=2, row=5)
+                self.radio.grid(columnspan=2, row=6)
             
             self.profiles = list(self.data.keys())
             self.profile.set(self.profiles[0]) # Sets first profile as default
@@ -378,6 +390,7 @@ class Windows:
         if outcome == 'Loss':
             self.data[self.profile.get()]['Balance'] -= self.bet_amount
             self.data[self.profile.get()]['Losses'] += 1
+            
         elif outcome == 'Win':
             self.data[self.profile.get()]['Balance'] += self.bet_amount
             self.data[self.profile.get()]['Wins'] += 1
