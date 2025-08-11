@@ -1,5 +1,23 @@
 {
     "Player1": {
-        "Balance": 1080
+        "Balance": 1003,
+        "Wins": 2,
+        "Losses": 1,
+        "Games": 4,
+        "Winstreak": 2
+    },
+    "Player2": {
+        "Balance": 977,
+        "Wins": 14,
+        "Losses": 52,
+        "Games": 71,
+        "Winstreak": 0
+    },
+    "Player3": {
+        "Balance": 699,
+        "Wins": 8,
+        "Losses": 20,
+        "Games": 40,
+        "Winstreak": 5
     }
 }

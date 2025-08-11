@@ -276,8 +276,14 @@ class Windows:
                 self.l_winrate_number = Label(self.individual_profile, text=f'{round(winrate_percent, 1)}%', fg='blue')
                 self.l_winrate_number.grid(column=1, row=5)
 
+                self.l_winstreak = Label(self.individual_profile, text='Winstreak:')
+                self.l_winstreak.grid(column=0, row=6)
+
+                self.l_winstreak_number = Label(self.individual_profile, text=value['Winstreak'], fg='blue', font='Arial 10 bold')
+                self.l_winstreak_number.grid(column=1, row=6)
+
                 self.radio = Radiobutton(self.individual_profile, variable=self.profile, value=key)
-                self.radio.grid(columnspan=2, row=6)
+                self.radio.grid(columnspan=2, row=7)
             
             self.profiles = list(self.data.keys())
             self.profile.set(self.profiles[0]) # Sets first profile as default
@@ -390,10 +396,12 @@ class Windows:
         if outcome == 'Loss':
             self.data[self.profile.get()]['Balance'] -= self.bet_amount
             self.data[self.profile.get()]['Losses'] += 1
+            self.data[self.profile.get()]['Winstreak'] = 0
             
         elif outcome == 'Win':
             self.data[self.profile.get()]['Balance'] += self.bet_amount
             self.data[self.profile.get()]['Wins'] += 1
+            self.data[self.profile.get()]['Winstreak'] += 1
         self.data[self.profile.get()]['Games']+=1
         self.save()
 
@@ -440,6 +448,8 @@ class Windows:
             self.data[self.profile.get()]['Balance'] = 1000
             self.data[self.profile.get()]['Wins'] = 0
             self.data[self.profile.get()]['Losses'] = 0
+            self.data[self.profile.get()]['Games'] = 0
+            self.data[self.profile.get()]['Winstreak'] = 0
             self.save()
 
         self.right_align.destroy()
