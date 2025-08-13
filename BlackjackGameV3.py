@@ -113,7 +113,7 @@ class Windows:
         self.betting_frame=Frame(self.main_frame)
         self.betting_frame.pack(fill=BOTH, expand=True)
 
-        self.l_balance = Label(self.betting_frame, text=f"Balance: ${self.data[self.profile.get()]['Balance']}", font=self.BUTTON_FONT)
+        self.l_balance = Label(self.betting_frame, text=f"Balance: ${self.shrink_big_number(self.data[self.profile.get()]['Balance'])}", font=self.BUTTON_FONT)
         self.l_balance.pack(side=TOP, fill=X, pady=10)
 
         # Creates a frame to centre betting amount
@@ -142,6 +142,8 @@ class Windows:
         self.playing_frame=Frame(self.main_frame)
         self.playing_frame.pack(fill=BOTH, expand=True)
         
+        self.background_colour = 'green'
+
         # Creating and shuffling Deck
         self.deck=pd.Deck()
         self.deck.shuffle()
@@ -249,19 +251,19 @@ class Windows:
                 self.l_balance = Label(self.individual_profile, text='Balance:')
                 self.l_balance.grid(column=0, row=2)
 
-                self.l_balance_amount = Label(self.individual_profile, text=f'${value["Balance"]}')
+                self.l_balance_amount = Label(self.individual_profile, text=f'${self.shrink_big_number(value["Balance"])}')
                 self.l_balance_amount.grid(column=1, row=2)
 
                 self.l_wins = Label(self.individual_profile, text='Wins:')
                 self.l_wins.grid(column=0, row=3)
 
-                self.l_wins_amount = Label(self.individual_profile, text=value["Wins"], fg='green')
+                self.l_wins_amount = Label(self.individual_profile, text=self.shrink_big_number(value["Wins"]), fg='green')
                 self.l_wins_amount.grid(column=1, row=3)
 
                 self.l_losses = Label(self.individual_profile, text='Losses:')
                 self.l_losses.grid(column=0, row=4)
 
-                self.l_losses_amount = Label(self.individual_profile, text=value["Losses"], fg='red')
+                self.l_losses_amount = Label(self.individual_profile, text=self.shrink_big_number(value["Losses"]), fg='red')
                 self.l_losses_amount.grid(column=1, row=4)
 
                 self.l_winrate = Label(self.individual_profile, text='Winrate:')
@@ -333,9 +335,10 @@ class Windows:
     def bet (self):
         '''Checks Betting amount is valid and opens window if so'''
         try:
-            if int(self.e_bet_amount.get())>self.data[self.profile.get()]['Balance']:
+            bet = int(self.e_bet_amount.get())
+            if bet>self.data[self.profile.get()]['Balance']:
                 messagebox.showerror('Error', 'Bet is higher than your balance. Enter lower bet.')
-            elif int(self.e_bet_amount.get())<=0:
+            elif bet<=0:
                 messagebox.showerror('Error', 'Bet must be greater than 0.')
             else:
                 self.open_window('Betting', 'Playing')
@@ -374,7 +377,6 @@ class Windows:
 
             self.l_player_total.configure(text=str(self.player_total))
             if self.player_total > 21: # Checking if player busts
-                messagebox.showinfo("You Busted", f"-${self.bet_amount}")
                 self.win_or_loss('Loss')
                 # Creates play again button
                 self.play_again()
@@ -393,15 +395,37 @@ class Windows:
     def win_or_loss(self, outcome):
         '''Adds or removes bet amount to profile balance'''
         outcome.title()
+        FONT = 'Arial 30 bold'
+        # If user losses
         if outcome == 'Loss':
             self.data[self.profile.get()]['Balance'] -= self.bet_amount
             self.data[self.profile.get()]['Losses'] += 1
             self.data[self.profile.get()]['Winstreak'] = 0
-            
+            self.l_amount = Label(self.actions_frame, text=f'-${self.shrink_big_number(self.bet_amount)}', fg='black', font=FONT)
+            self.l_amount.pack(side=RIGHT, padx=20)
+            self.l_outcome = Label(self.actions_frame, text='Loss', fg='black', font=FONT)
+            self.l_outcome.pack(side=RIGHT, padx=20)
+            self.change_background(self.playing_frame, '#d40202')
+        
+        # If user wins
         elif outcome == 'Win':
             self.data[self.profile.get()]['Balance'] += self.bet_amount
             self.data[self.profile.get()]['Wins'] += 1
             self.data[self.profile.get()]['Winstreak'] += 1
+            self.l_amount = Label(self.actions_frame, text=f'+${self.shrink_big_number(self.bet_amount)}', fg='green', font=FONT)
+            self.l_amount.pack(side=RIGHT, padx=20)
+            self.l_outcome = Label(self.actions_frame, text='Win', fg='green', font=FONT)
+            self.l_outcome.pack(side=RIGHT, padx=20)
+            self.change_background(self.playing_frame, '#09d940')
+        
+        # If user ties with dealer
+        elif outcome == 'Push':
+            self.l_amount = Label(self.actions_frame, text=f'+$0', font=FONT)
+            self.l_amount.pack(side=RIGHT, padx=20)
+            self.l_outcome = Label(self.actions_frame, text='Push', font=FONT)
+            self.l_outcome.pack(side=RIGHT, padx=20)
+            self.change_background(self.playing_frame, '#c99802')
+            
         self.data[self.profile.get()]['Games']+=1
         self.save()
 
@@ -414,16 +438,12 @@ class Windows:
 
         # Winning Conditions
         if self.dealer_total > 21:
-            messagebox.showinfo("Dealer Busted", f"+${self.bet_amount}")
             self.win_or_loss('Win')
         elif self.player_total < self.dealer_total:
-            messagebox.showinfo(f"You Lose", f"-${self.bet_amount}")
             self.win_or_loss('Loss')
         elif self.player_total > self.dealer_total:
-            messagebox.showinfo(f"You Win", f"+${self.bet_amount}")
             self.win_or_loss('Win')
         elif self.player_total == self.dealer_total:
-            messagebox.showinfo("Push", f"+$0")
             self.win_or_loss('Push')
         # Creates play again button 
         self.play_again()
@@ -436,6 +456,10 @@ class Windows:
 
     def play_again(self):
         '''Creates Play Again or Create New Account Button'''
+        self.right_align.destroy()
+        self.b_menu = Button(self.actions_frame, text='MENU', font=self.BUTTON_FONT, fg='white', bg='red', width=9, command=lambda: self.open_window('Playing', 'Menu'))
+        self.b_menu.pack(side=LEFT, pady=10, padx=20)
+
         if self.data[self.profile.get()]['Balance']>0:
             # Creates play again button 
                 self.b_replay = Button(self.cards_frame, text='PLAY AGAIN', font=self.BUTTON_FONT, fg='white', bg=self.YELLOW, command=lambda: self.open_window('Playing', 'Betting'))
@@ -452,9 +476,6 @@ class Windows:
             self.data[self.profile.get()]['Winstreak'] = 0
             self.save()
 
-        self.right_align.destroy()
-        self.b_menu = Button(self.actions_frame, text='MENU', font=self.BUTTON_FONT, fg='white', bg='red', width=9, command=lambda: self.open_window('Playing', 'Menu'))
-        self.b_menu.pack(pady=10)
 
     def get_card_image(self, card):
         '''Gets image for card'''
@@ -468,5 +489,19 @@ class Windows:
             return ImageTk.PhotoImage(original_image)
         except FileNotFoundError:
             print('File not Found')
+    
+    def change_background(self, parent, color):
+        '''Changes background colour of all Labels and Frames in given parent'''
+        for child in parent.winfo_children():
+            if isinstance(child, (Label, Frame)):
+                child.config(bg=color)
 
+            if child.winfo_children(): 
+                self.change_background(child, color)
+    def shrink_big_number(self, number):
+        '''If number is over 1 billion, it will be reformated'''
+        if number >1000000000:
+            return "{:.6g}".format(number)
+        else:
+            return number
 app=Windows()
