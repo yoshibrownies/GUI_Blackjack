@@ -13,8 +13,8 @@ class Windows:
     def __init__(self):
         self.master=Tk()
         self.master.title('Blackjack')
-        self.master.resizable(0,0)
         self.master.geometry("700x500") 
+        self.master.minsize(width=700, height=500)
 
         with open('Gamehistory.json', 'r') as f: # Getting information from gamehistory file
             self.data = j.load(f)
@@ -241,11 +241,13 @@ class Windows:
         # Centering 
         self.center_frame = Frame(self.profile_frame)
         self.center_frame.pack(fill=X, side=TOP, pady=40)
-
+        self.center_frame.grid_columnconfigure([0, 1, 2], weight=1)
+        column_count = -1
         # Loops through all profiles
         for key, value in self.data.items():
+            column_count+=1
             self.individual_profile = Frame(self.center_frame, padx=65,)
-            self.individual_profile.pack(side=LEFT)
+            self.individual_profile.grid(row=0, column=column_count)
 
             self.individual_profile.rowconfigure([0,1,2,3], minsize=10)
 
