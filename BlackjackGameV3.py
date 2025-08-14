@@ -213,91 +213,96 @@ class Windows:
         self.right_align.pack(side=RIGHT)
 
         self.b_hit = Button(self.right_align, text='HIT', font=self.BUTTON_FONT, fg='white', bg='red', width=9, command=lambda: self.hit('Player'))
-        self.b_hit.grid(column=1, row=0, padx=10, pady=5)
+        self.b_hit.grid(column=2, row=0, padx=10, pady=5)
 
         self.b_stand = Button(self.right_align, text='STAND', font=self.BUTTON_FONT, fg='white', bg='green', width=9, command=self.stand)
-        self.b_stand.grid(column=0, row=0, padx=10, pady=5)
+        self.b_stand.grid(column=1, row=0, padx=10, pady=5)
+
+        if self.data[self.profile.get()]['Balance']>2*self.bet_amount:
+            self.b_double = Button(self.right_align, text='DOUBLE', font=self.BUTTON_FONT, fg='white', bg='red', width=9, command=self.double)
+            self.b_double.grid(column=0, row=0, padx=10, pady=5)
 
     def create_profile_window(self):
-            '''Creates profile frame'''
-            self.profile_frame = Frame(self.main_frame)
-            self.profile_frame.pack(fill=BOTH, expand=True)
+        '''Creates profile frame'''
+        self.profile_frame = Frame(self.main_frame)
+        self.profile_frame.pack(fill=BOTH, expand=True)
 
-            self.l_title = Label(self.profile_frame, text='Profiles', font='Arial 40 bold', pady=30)
-            self.l_title.pack(side=TOP)
+        self.l_title = Label(self.profile_frame, text='Profiles', font='Arial 40 bold', pady=30)
+        self.l_title.pack(side=TOP)
 
-            self.profile = StringVar()
+        self.profile = StringVar()
 
-            self.l_current = Label(self.profile_frame, text='Selected Profile:', font='Arial 10')
-            self.l_current.pack(side=TOP)
+        self.l_current = Label(self.profile_frame, text='Selected Profile:', font='Arial 10')
+        self.l_current.pack(side=TOP)
 
-            self.l_current_profile = Label(self.profile_frame, textvariable=self.profile, font='Arial 10 bold', fg='green')
-            self.l_current_profile.pack(side=TOP)
+        self.l_current_profile = Label(self.profile_frame, textvariable=self.profile, font='Arial 10 bold', fg='green')
+        self.l_current_profile.pack(side=TOP)
 
-            # Centering 
-            self.center_frame = Frame(self.profile_frame)
-            self.center_frame.pack(fill=X, side=TOP, pady=40)
+        # Centering 
+        self.center_frame = Frame(self.profile_frame)
+        self.center_frame.pack(fill=X, side=TOP, pady=40)
 
-            # Loops through all profiles
-            for key, value in self.data.items():
-                self.individual_profile = Frame(self.center_frame, padx=65,)
-                self.individual_profile.pack(side=LEFT)
+        # Loops through all profiles
+        for key, value in self.data.items():
+            self.individual_profile = Frame(self.center_frame, padx=65,)
+            self.individual_profile.pack(side=LEFT)
 
-                self.individual_profile.rowconfigure([0,1,2,3], minsize=10)
+            self.individual_profile.rowconfigure([0,1,2,3], minsize=10)
 
-                self.l_title = Label(self.individual_profile, text=key, font='Arial 20 bold')
-                self.l_title.grid(columnspan=2, row=0)
+            self.l_title = Label(self.individual_profile, text=key, font='Arial 20 bold')
+            self.l_title.grid(columnspan=2, row=0)
 
-                self.l_balance = Label(self.individual_profile, text='Balance:')
-                self.l_balance.grid(column=0, row=2)
+            self.l_balance = Label(self.individual_profile, text='Balance:')
+            self.l_balance.grid(column=0, row=2)
 
-                self.l_balance_amount = Label(self.individual_profile, text=f'${self.shrink_big_number(value["Balance"])}')
-                self.l_balance_amount.grid(column=1, row=2)
+            self.l_balance_amount = Label(self.individual_profile, text=f'${self.shrink_big_number(value["Balance"])}')
+            self.l_balance_amount.grid(column=1, row=2)
 
-                self.l_wins = Label(self.individual_profile, text='Wins:')
-                self.l_wins.grid(column=0, row=3)
+            self.l_wins = Label(self.individual_profile, text='Wins:')
+            self.l_wins.grid(column=0, row=3)
 
-                self.l_wins_amount = Label(self.individual_profile, text=self.shrink_big_number(value["Wins"]), fg='green')
-                self.l_wins_amount.grid(column=1, row=3)
+            self.l_wins_amount = Label(self.individual_profile, text=self.shrink_big_number(value["Wins"]), fg='green')
+            self.l_wins_amount.grid(column=1, row=3)
 
-                self.l_losses = Label(self.individual_profile, text='Losses:')
-                self.l_losses.grid(column=0, row=4)
+            self.l_losses = Label(self.individual_profile, text='Losses:')
+            self.l_losses.grid(column=0, row=4)
 
-                self.l_losses_amount = Label(self.individual_profile, text=self.shrink_big_number(value["Losses"]), fg='red')
-                self.l_losses_amount.grid(column=1, row=4)
+            self.l_losses_amount = Label(self.individual_profile, text=self.shrink_big_number(value["Losses"]), fg='red')
+            self.l_losses_amount.grid(column=1, row=4)
 
-                self.l_winrate = Label(self.individual_profile, text='Winrate:')
-                self.l_winrate.grid(column=0, row=5)
-                
-                # Calculating winrate
-                if value["Games"]>0:
-                    winrate_percent = value["Wins"]/value["Games"]*100
-                else:
-                    winrate_percent = 0
-
-                self.l_winrate_number = Label(self.individual_profile, text=f'{round(winrate_percent, 1)}%', fg='blue')
-                self.l_winrate_number.grid(column=1, row=5)
-
-                self.l_winstreak = Label(self.individual_profile, text='Winstreak:')
-                self.l_winstreak.grid(column=0, row=6)
-
-                self.l_winstreak_number = Label(self.individual_profile, text=value['Winstreak'], fg='blue', font='Arial 10 bold')
-                self.l_winstreak_number.grid(column=1, row=6)
-
-                self.radio = Radiobutton(self.individual_profile, variable=self.profile, value=key)
-                self.radio.grid(columnspan=2, row=7)
+            self.l_winrate = Label(self.individual_profile, text='Winrate:')
+            self.l_winrate.grid(column=0, row=5)
             
-            self.profiles = list(self.data.keys())
-            self.profile.set(self.profiles[0]) # Sets first profile as default
+            # Calculating winrate
+            if value["Games"]>0:
+                winrate_percent = value["Wins"]/value["Games"]*100
+            else:
+                winrate_percent = 0
 
-            self.button_frame = Frame(self.profile_frame)
-            self.button_frame.pack(side=TOP)
+            self.l_winrate_number = Label(self.individual_profile, text=f'{round(winrate_percent, 1)}%', fg='blue')
+            self.l_winrate_number.grid(column=1, row=5)
 
-            self.b_back = Button(self.button_frame, text='BACK', font=self.BUTTON_FONT, fg='white', bg='red', width=9, command=lambda: self.open_window('Profile', 'Menu'))
-            self.b_back.pack(side=LEFT, padx=30)
+            self.l_winstreak = Label(self.individual_profile, text='Winstreak:')
+            self.l_winstreak.grid(column=0, row=6)
 
-            self.b_play = Button(self.button_frame, text='PLAY', font=self.BUTTON_FONT, fg='white', bg='green', width=9, command=lambda: self.open_window('Profile','Betting'))
-            self.b_play.pack(side=LEFT, padx=30)
+            self.l_winstreak_number = Label(self.individual_profile, text=value['Winstreak'], fg='blue', font='Arial 10 bold')
+            self.l_winstreak_number.grid(column=1, row=6)
+
+            self.radio = Radiobutton(self.individual_profile, variable=self.profile, value=key)
+            self.radio.grid(columnspan=2, row=7)
+        
+        self.profiles = list(self.data.keys())
+        self.profile.set(self.profiles[0]) # Sets first profile as default
+
+        self.button_frame = Frame(self.profile_frame)
+        self.button_frame.pack(side=TOP)
+
+        self.b_back = Button(self.button_frame, text='BACK', font=self.BUTTON_FONT, fg='white', bg='red', width=9, command=lambda: self.open_window('Profile', 'Menu'))
+        self.b_back.pack(side=LEFT, padx=30)
+
+        self.b_play = Button(self.button_frame, text='PLAY', font=self.BUTTON_FONT, fg='white', bg='green', width=9, command=lambda: self.open_window('Profile','Betting'))
+        self.b_play.pack(side=LEFT, padx=30)
+
     def open_window(self, current_frame, window_name):
         '''Opens new frames and destroys previously open one'''
 
@@ -367,6 +372,7 @@ class Windows:
     def hit(self, person):
         '''Deals another card to hand'''
         if person == 'Player':
+            self.b_double.destroy()
             self.player_hand += self.deck.deal(1)
             self.player_total = self.calculate_hand_value(self.player_hand)
 
@@ -448,9 +454,15 @@ class Windows:
         # Creates play again button 
         self.play_again()
     
+    def double(self):
+        '''Doubles Player Bet'''
+        self.bet_amount = self.bet_amount*2
+        self.hit('Player')
+        if self.calculate_hand_value(self.player_hand) <= 21: # Checking user hasnt already busted
+            self.stand()
+    
     def save(self):
         '''Saves data'''
-        # Saves to gamehistory file
         with open('Gamehistory.json', 'w') as f:
             j.dump(self.data, f, indent=4)
 
