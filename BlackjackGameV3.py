@@ -3,6 +3,7 @@ from tkinter import messagebox
 import pydealer as pd
 import json as j
 from PIL import Image, ImageTk
+from tkinter import font as tkFont
 '''
 Version Three
 - Error Proof
@@ -13,8 +14,7 @@ class Windows:
     def __init__(self):
         self.master=Tk()
         self.master.title('Blackjack')
-        self.master.geometry("700x500") 
-        self.master.minsize(width=700, height=500)
+        self.master.attributes('-fullscreen', True)
 
         with open('Gamehistory.json', 'r') as f: # Getting information from gamehistory file
             self.data = j.load(f)
@@ -23,7 +23,7 @@ class Windows:
         self.main_frame = Frame(self.master)
         self.main_frame.pack(fill=BOTH, expand=True)
 
-        self.BUTTON_FONT = 'Arial 20 bold'
+        self.BUTTON_FONT = 'Arial 30 bold'
         self.YELLOW = '#FFC300'
 
         self.create_menu_window()
@@ -34,10 +34,10 @@ class Windows:
         self.menu_frame=Frame(self.main_frame)
         self.menu_frame.pack(fill=BOTH, expand=True)
         # Adds a spacer frame to push buttons down
-        self.spacer_frame = Frame(self.menu_frame, height=200)
+        self.spacer_frame = Frame(self.menu_frame)
         self.spacer_frame.pack()
 
-        self.l_title=Label(self.spacer_frame, text='Black Jack', font='Arial 60 bold', fg='black')
+        self.l_title=Label(self.spacer_frame, text='Black Jack', font='Arial 150 bold', fg='black')
         self.l_title.pack(pady=90, side=BOTTOM)
 
         # Creates a frame to hold the buttons
@@ -52,56 +52,64 @@ class Windows:
         self.b_help = Button(self.button_frame, text='HELP', font=self.BUTTON_FONT, fg='white', bg=self.YELLOW, width=9, command=lambda: self.open_window('Menu', 'Help'))
         self.b_help.pack(side=LEFT, padx=30)
 
+        # Bottom Frame
+        self.bottom_frame = Frame(self.menu_frame)
+        self.bottom_frame.pack(side=BOTTOM, fill=X) 
+
+        self.b_close = Button(self.bottom_frame, text='CLOSE', font=self.BUTTON_FONT, fg='white', bg='red', width=9, command=self.master.destroy)
+        self.b_close.pack(side=LEFT, pady=30, padx=30)
+
     def create_help_window(self):
         '''Creates help frame'''
         self.help_frame = Frame(self.main_frame)
         self.help_frame.pack(fill=BOTH, expand=True)
-        TITLE_STYLE = 'Arial 15 bold'
+        TITLE_STYLE = 'Arial 30 bold'
+        DESCRIPTION_STYLE = 'Arial 15'
 
         # Centering all information
         self.center_frame = Frame(self.help_frame)
         self.center_frame.pack(side=TOP)
 
         # Header
-        self.l_title = Label(self.center_frame, text='How To Play', font='Arial 35 bold', justify=CENTER)
+        self.l_title = Label(self.center_frame, text='How To Play', font='Arial 50 bold', justify=CENTER)
         self.l_title.grid(row=0, columnspan=2)
         
-        self.l_description = Label(self.center_frame, text='Objective: Beat the dealer by getting a hand value as close to 21 as possible without going over.\n')
+        self.l_description = Label(self.center_frame, font='Arial 20', text='Objective: Beat the dealer by getting a hand value as close to 21 as possible without going over.\n')
         self.l_description.grid(row=1, columnspan=2)
 
         # Card Values
         self.l_cardvalues = Label(self.center_frame, font=TITLE_STYLE, text='Card Values')
         self.l_cardvalues.grid(row=2, column=0, padx=10)
 
-        self.l_cardvalues_description = Label(self.center_frame, text='Number Cards (2-10): Face Value\nFace Cards (King, Queen, Jack): Worth 10\nAces: Worth 1 or 11\n')
+        self.l_cardvalues_description = Label(self.center_frame, font=DESCRIPTION_STYLE, text='Number Cards (2-10): Face Value\nFace Cards (King, Queen, Jack): Worth 10\nAces: Worth 1 or 11\n')
         self.l_cardvalues_description.grid(row=3, column=0, padx=10)
 
         # Game Setup
         self.l_gamesetup = Label(self.center_frame, font=TITLE_STYLE, text='Game Setup')
         self.l_gamesetup.grid(row=4, column=0, padx=10)
 
-        self.l_gamesetup_description = Label(self.center_frame, text='1. You place a bet\n2. You and the dealer get two cards\n(your cards face up, dealer has one \nface up and one face down)\n')
+        self.l_gamesetup_description = Label(self.center_frame, font=DESCRIPTION_STYLE, text='1. You place a bet\n2. You and the dealer get two cards\n(your cards face up, dealer has one \nface up and one face down)\n')
         self.l_gamesetup_description.grid(row=5, column=0, padx=10)
 
         # Player Actions
         self.l_playeractions = Label(self.center_frame, font=TITLE_STYLE, text='Player Actions')
         self.l_playeractions.grid(row=6, column=0, padx=10)
 
-        self.l_playeractions_description = Label(self.center_frame, text='Hit: Take another card\nStand: Keep your current hand\nDouble Down: Double your bet and take \none more card\nSplit: If you have two cards of the same value, \nsplit them into two hands for an additional bet\n')
+        self.l_playeractions_description = Label(self.center_frame, font=DESCRIPTION_STYLE, text='Hit: Take another card\nStand: Keep your current hand\nDouble Down: Double your bet and take \none more card\nSplit: If you have two cards of the same value, \nsplit them into two hands for an additional bet\n')
         self.l_playeractions_description.grid(row=7, column=0, padx=10)
 
         # Dealer's Turn
         self.l_dealerturn = Label(self.center_frame, font=TITLE_STYLE, text="Dealer's Turn")
         self.l_dealerturn.grid(row=2, column=1, padx=10)
 
-        self.l_dealerturn_description = Label(self.center_frame, text='The dealer reveals their hole card and \nmust hit until reaching 17 or higher.\n')
+        self.l_dealerturn_description = Label(self.center_frame, font=DESCRIPTION_STYLE, text='The dealer reveals their hole card and \nmust hit until reaching 17 or higher.\n')
         self.l_dealerturn_description.grid(row=3, column=1, padx=10)
 
         # Winning
         self.l_winning = Label(self.center_frame, font=TITLE_STYLE, text='Winning')
         self.l_winning.grid(row=4, column=1, padx=10)
 
-        self.l_winning_description = Label(self.center_frame, text="1. If your hand exceeds 21, you bust and lose\n2. If the dealer busts, remaining players win\n3. If your hand is closer to 21 than the dealer's,\n you win (payout is typically 1:1)\n4. A blackjack (Ace + 10-value card) usually pays 3:2\n5. A tie results in a push, and you get your bet back")
+        self.l_winning_description = Label(self.center_frame, font=DESCRIPTION_STYLE, text="1. If your hand exceeds 21, you bust and lose\n2. If the dealer busts, remaining players win\n3. If your hand is closer to 21 than the dealer's,\n you win (payout is typically 1:1)\n4. A blackjack (Ace + 10-value card) usually pays 3:2\n5. A tie results in a push, and you get your bet back")
         self.l_winning_description.grid(row=5, column=1, padx=10)
 
         # Back Button
@@ -113,7 +121,8 @@ class Windows:
         self.betting_frame=Frame(self.main_frame)
         self.betting_frame.pack(fill=BOTH, expand=True)
 
-        self.l_balance = Label(self.betting_frame, text=f"Balance: ${self.shrink_big_number(self.data[self.profile.get()]['Balance'])}", font=self.BUTTON_FONT)
+        # Shows Balance
+        self.l_balance = Label(self.betting_frame, text=f"Balance: ${self.shrink_big_number(self.data[self.profile.get()]['Balance'])}", font='Arial 40 bold')
         self.l_balance.pack(side=TOP, fill=X, pady=10)
 
         # Creates a frame to centre betting amount
@@ -121,10 +130,10 @@ class Windows:
         self.center_frame.pack(expand=True)  # Center the frame in the window
 
         # Betting Amount 
-        self.l_bet_title = Label(self.center_frame, text='Betting Amount: $', font='Arial 20 bold')
+        self.l_bet_title = Label(self.center_frame, text='Betting Amount: $', font='Arial 50 bold')
         self.l_bet_title.pack(side=LEFT)
 
-        self.e_bet_amount = Entry(self.center_frame, font='Arial 25 bold')
+        self.e_bet_amount = Entry(self.center_frame, font='Arial 50 bold')
         self.e_bet_amount.pack(side=LEFT)
 
         # Buttons
@@ -141,7 +150,7 @@ class Windows:
         '''Creates playing frame'''
         self.playing_frame=Frame(self.main_frame)
         self.playing_frame.pack(fill=BOTH, expand=True)
-        
+
         self.background_colour = 'green'
 
         # Creating and shuffling Deck
@@ -164,7 +173,7 @@ class Windows:
         self.dealer_frame = Frame(self.playing_frame, bg='green', height=50)
         self.dealer_frame.pack(fill=X, side=TOP)
 
-        self.l_dealer_title = Label(self.dealer_frame, bg='green', text='Dealer', font='Arial 20 bold')
+        self.l_dealer_title = Label(self.dealer_frame, bg='green', text='Dealer', font='Arial 50 bold')
         self.l_dealer_title.pack()
 
     # Cards Frame
@@ -172,7 +181,7 @@ class Windows:
         self.cards_frame.pack(fill=BOTH, expand=True)
         
         # Player Cards & Score
-        self.l_player_total = Label(self.cards_frame, text=str(self.player_total), bg='green', font='Arial 15 bold', pady=10)
+        self.l_player_total = Label(self.cards_frame, text=str(self.player_total), bg='green', font='Arial 30 bold', pady=10)
         self.l_player_total.pack(side=BOTTOM)
         
         self.player_cards_frame = Frame(self.cards_frame, bg='white')
@@ -190,7 +199,7 @@ class Windows:
         self.l_player_card.pack(side=LEFT)
 
         # Dealer Cards & Score
-        self.l_dealer_total = Label(self.cards_frame, text=str(self.dealer_total), bg='green', font='Arial 15 bold', pady=10)
+        self.l_dealer_total = Label(self.cards_frame, text=str(self.dealer_total), bg='green', font='Arial 30 bold', pady=10)
         self.l_dealer_total.pack(side=TOP)
 
         self.dealer_cards_frame = Frame(self.cards_frame, bg='white')
@@ -227,15 +236,15 @@ class Windows:
         self.profile_frame = Frame(self.main_frame)
         self.profile_frame.pack(fill=BOTH, expand=True)
 
-        self.l_title = Label(self.profile_frame, text='Profiles', font='Arial 40 bold', pady=30)
+        self.l_title = Label(self.profile_frame, text='Profiles', font='Arial 70 bold', pady=40)
         self.l_title.pack(side=TOP)
 
         self.profile = StringVar()
 
-        self.l_current = Label(self.profile_frame, text='Selected Profile:', font='Arial 10')
+        self.l_current = Label(self.profile_frame, text='Selected Profile:', font='Arial 20')
         self.l_current.pack(side=TOP)
 
-        self.l_current_profile = Label(self.profile_frame, textvariable=self.profile, font='Arial 10 bold', fg='green')
+        self.l_current_profile = Label(self.profile_frame, textvariable=self.profile, font='Arial 20 bold', fg='green')
         self.l_current_profile.pack(side=TOP)
 
         # Centering 
@@ -243,36 +252,39 @@ class Windows:
         self.center_frame.pack(fill=X, side=TOP, pady=40)
         self.center_frame.grid_columnconfigure([0, 1, 2], weight=1)
         column_count = -1
+
+        DESCRIPTION_STYLE = 'Arial 20'
+        radio_button_font = tkFont.Font(family="Arial", size=10, weight="bold")
         # Loops through all profiles
         for key, value in self.data.items():
             column_count+=1
-            self.individual_profile = Frame(self.center_frame, padx=65,)
+            self.individual_profile = Frame(self.center_frame, padx=65)
             self.individual_profile.grid(row=0, column=column_count)
 
             self.individual_profile.rowconfigure([0,1,2,3], minsize=10)
 
-            self.l_title = Label(self.individual_profile, text=key, font='Arial 20 bold')
+            self.l_title = Label(self.individual_profile, text=key, font='Arial 50 bold', pady=20)
             self.l_title.grid(columnspan=2, row=0)
 
-            self.l_balance = Label(self.individual_profile, text='Balance:')
+            self.l_balance = Label(self.individual_profile, text='Balance:', font=DESCRIPTION_STYLE)
             self.l_balance.grid(column=0, row=2)
 
-            self.l_balance_amount = Label(self.individual_profile, text=f'${self.shrink_big_number(value["Balance"])}')
+            self.l_balance_amount = Label(self.individual_profile, text=f'${self.shrink_big_number(value["Balance"])}', font=DESCRIPTION_STYLE)
             self.l_balance_amount.grid(column=1, row=2)
 
-            self.l_wins = Label(self.individual_profile, text='Wins:')
+            self.l_wins = Label(self.individual_profile, text='Wins:', font=DESCRIPTION_STYLE)
             self.l_wins.grid(column=0, row=3)
 
-            self.l_wins_amount = Label(self.individual_profile, text=self.shrink_big_number(value["Wins"]), fg='green')
+            self.l_wins_amount = Label(self.individual_profile, text=self.shrink_big_number(value["Wins"]), fg='green', font=DESCRIPTION_STYLE)
             self.l_wins_amount.grid(column=1, row=3)
 
-            self.l_losses = Label(self.individual_profile, text='Losses:')
+            self.l_losses = Label(self.individual_profile, text='Losses:', font=DESCRIPTION_STYLE)
             self.l_losses.grid(column=0, row=4)
 
-            self.l_losses_amount = Label(self.individual_profile, text=self.shrink_big_number(value["Losses"]), fg='red')
+            self.l_losses_amount = Label(self.individual_profile, text=self.shrink_big_number(value["Losses"]), fg='red', font=DESCRIPTION_STYLE)
             self.l_losses_amount.grid(column=1, row=4)
 
-            self.l_winrate = Label(self.individual_profile, text='Winrate:')
+            self.l_winrate = Label(self.individual_profile, text='Winrate:', font=DESCRIPTION_STYLE)
             self.l_winrate.grid(column=0, row=5)
             
             # Calculating winrate
@@ -281,23 +293,23 @@ class Windows:
             else:
                 winrate_percent = 0
 
-            self.l_winrate_number = Label(self.individual_profile, text=f'{round(winrate_percent, 1)}%', fg='blue')
+            self.l_winrate_number = Label(self.individual_profile, text=f'{round(winrate_percent, 1)}%', fg='blue', font=DESCRIPTION_STYLE)
             self.l_winrate_number.grid(column=1, row=5)
 
-            self.l_winstreak = Label(self.individual_profile, text='Winstreak:')
+            self.l_winstreak = Label(self.individual_profile, text='Winstreak:', font=DESCRIPTION_STYLE)
             self.l_winstreak.grid(column=0, row=6)
 
-            self.l_winstreak_number = Label(self.individual_profile, text=value['Winstreak'], fg='blue', font='Arial 10 bold')
+            self.l_winstreak_number = Label(self.individual_profile, text=value['Winstreak'], fg='blue', font=f'{DESCRIPTION_STYLE} bold')
             self.l_winstreak_number.grid(column=1, row=6)
 
-            self.radio = Radiobutton(self.individual_profile, variable=self.profile, value=key)
-            self.radio.grid(columnspan=2, row=7)
+            self.radio = Radiobutton(self.individual_profile, variable=self.profile, value=key, font=radio_button_font, indicatoron=0, width=2, height=1, borderwidth=0, bg='black')
+            self.radio.grid(columnspan=2, row=7, pady=20)
         
         self.profiles = list(self.data.keys())
         self.profile.set(self.profiles[0]) # Sets first profile as default
 
         self.button_frame = Frame(self.profile_frame)
-        self.button_frame.pack(side=TOP)
+        self.button_frame.pack(side=BOTTOM, pady=40)
 
         self.b_back = Button(self.button_frame, text='BACK', font=self.BUTTON_FONT, fg='white', bg='red', width=9, command=lambda: self.open_window('Profile', 'Menu'))
         self.b_back.pack(side=LEFT, padx=30)
@@ -403,7 +415,7 @@ class Windows:
     def win_or_loss(self, outcome):
         '''Adds or removes bet amount to profile balance'''
         outcome.title()
-        FONT = 'Arial 30 bold'
+        FONT = 'Arial 60 bold'
         # If user losses
         if outcome == 'Loss':
             self.data[self.profile.get()]['Balance'] -= self.bet_amount
@@ -499,7 +511,7 @@ class Windows:
             else:
                 original_image = Image.open(f"PNG/{card.value[0]}{card.suit[0]}.png")
             
-            original_image = original_image.resize((70, 105), Image.LANCZOS)
+            original_image = original_image.resize((100, 150), Image.LANCZOS)
             return ImageTk.PhotoImage(original_image)
         except FileNotFoundError:
             print('File not Found')
