@@ -314,8 +314,41 @@ class Windows:
         self.b_back = Button(self.button_frame, text='BACK', font=self.BUTTON_FONT, fg='white', bg='red', width=9, command=lambda: self.open_window('Profile', 'Menu'))
         self.b_back.pack(side=LEFT, padx=30)
 
+        self.b_rename = Button(self.button_frame, text='RENAME', font=self.BUTTON_FONT, fg='white', bg=self.YELLOW, width=9, command=lambda: self.open_window('Profile', 'Rename'))
+        self.b_rename.pack(side=LEFT, padx=30)
+
         self.b_play = Button(self.button_frame, text='PLAY', font=self.BUTTON_FONT, fg='white', bg='green', width=9, command=lambda: self.open_window('Profile','Betting'))
         self.b_play.pack(side=LEFT, padx=30)
+    
+    def create_rename_window(self):
+        '''Creates profile rename frame'''
+        self.rename_profile_frame = Frame(self.main_frame)
+        self.rename_profile_frame.pack(fill=BOTH, expand=True)
+
+        # Showing Current profile in top
+        self.l_showprofile = Label(self.rename_profile_frame, text=self.profile.get(), font='Arial 40 bold')
+        self.l_showprofile.pack(side=TOP, fill=X, pady=10)
+
+        # Creates a frame to centre rename entry
+        self.center_frame = Frame(self.rename_profile_frame)
+        self.center_frame.pack(expand=True)  # Center the frame in the window
+
+        # Rename
+        self.l_rename_title = Label(self.center_frame, text='New Name: ', font='Arial 50 bold')
+        self.l_rename_title.pack(side=LEFT)
+
+        self.e_rename = Entry(self.center_frame, font='Arial 50 bold')
+        self.e_rename.pack(side=LEFT)
+
+        # Buttons
+        self.button_frame = Frame(self.rename_profile_frame)
+        self.button_frame.pack(side=BOTTOM, pady=20)
+
+        self.b_back = Button(self.button_frame, text='BACK', font=self.BUTTON_FONT, fg='white', bg='red', width=9, command=lambda: self.open_window('Rename','Profile'))
+        self.b_back.pack(side=LEFT, padx=30)
+
+        self.b_rename = Button(self.button_frame, text='CONFIRM', font=self.BUTTON_FONT, fg='white', bg='green', width=9, command=self.rename)
+        self.b_rename.pack(side=LEFT, padx=30)
 
     def open_window(self, current_frame, window_name):
         '''Opens new frames and destroys previously open one'''
@@ -338,6 +371,8 @@ class Windows:
             self.betting_frame.destroy()
         elif current_frame == 'Playing':
             self.playing_frame.destroy()
+        elif current_frame == 'Rename':
+            self.rename_profile_frame.destroy()
 
         # Opens new frame
         if window_name == 'Menu':
@@ -350,8 +385,10 @@ class Windows:
             self.create_playing_window()
         elif window_name == 'Profile':
             self.create_profile_window()
+        elif window_name == 'Rename':
+            self.create_rename_window()
     
-    def bet (self):
+    def bet(self):
         '''Checks Betting amount is valid and opens window if so'''
         try:
             bet = int(self.e_bet_amount.get())
@@ -363,6 +400,23 @@ class Windows:
                 self.open_window('Betting', 'Playing')
         except ValueError:
             messagebox.showerror('Error', 'Enter only whole numbers.')
+    
+    def rename(self):
+        name = self.e_rename.get()
+        if len(name)>0:
+            if name not in self.data:
+                if len(name)<=10:
+                    answer = messagebox.askyesno("Confirmation", f"Are you sure you want to change {self.profile.get()} name to {name}")
+                    if answer == True:
+                        self.data[name] = self.data.pop(self.profile.get())
+                        self.save()
+                    self.open_window('Rename', 'Profile')
+                else:
+                    messagebox.showerror('Error', 'Name Too Long, Max 10 Characters.')
+            else:
+                messagebox.showerror('Error', 'Do not enter same name as another profile')
+        else:
+            messagebox.showerror('Error','Do not enter blank name.')
 
     def calculate_hand_value(self, hand):
         '''Calculates Hand Value'''
