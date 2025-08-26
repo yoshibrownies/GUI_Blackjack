@@ -1,0 +1,590 @@
+from tkinter import *
+from tkinter import messagebox
+import pydealer as pd
+import json as j
+from PIL import Image, ImageTk
+from tkinter import font as tkFont
+'''
+Version Three
+- Error Proof
+- Images
+- Multiples Profiles
+- Player Actions --> Doubling
+'''
+
+class Windows:
+    def __init__(self):
+        self.master = Tk()
+        self.master.title('Blackjack')
+        self.master.attributes('-fullscreen', True)
+
+        with open('Gamehistory.json', 'r') as f: # Getting information from gamehistory file
+            self.data = j.load(f)
+
+        # Main frame to hold everything
+        self.main_frame = Frame(self.master)
+        self.main_frame.pack(fill=BOTH, expand=True)
+
+        self.BUTTON_FONT = 'Arial 30 bold'
+        self.YELLOW = '#FFC300'
+
+        self.create_menu_window()
+        self.master.mainloop()
+
+    def create_menu_window(self):
+        '''Creates menu frame'''
+        self.menu_frame = Frame(self.main_frame)
+        self.menu_frame.pack(fill=BOTH, expand=True)
+        # Adds a spacer frame to push buttons down
+        self.spacer_frame = Frame(self.menu_frame)
+        self.spacer_frame.pack()
+
+        self.l_title = Label(self.spacer_frame, text='Black Jack', font='Arial 150 bold', fg='black')
+        self.l_title.pack(pady=90, side=BOTTOM)
+
+        # Creates a frame to hold the buttons
+        self.button_frame = Frame(self.menu_frame)
+        self.button_frame.pack(expand=True)  # Center the frame in the window
+
+        
+        # Buttons
+        self.b_play = Button(self.button_frame, text='PLAY', font=self.BUTTON_FONT, fg='white', bg=self.YELLOW, width=9, command=lambda: self.open_window('Menu', 'Profile'))
+        self.b_play.pack(side=LEFT, padx=30)
+
+        self.b_help = Button(self.button_frame, text='HELP', font=self.BUTTON_FONT, fg='white', bg=self.YELLOW, width=9, command=lambda: self.open_window('Menu', 'Help'))
+        self.b_help.pack(side=LEFT, padx=30)
+
+        # Bottom Frame
+        self.bottom_frame = Frame(self.menu_frame)
+        self.bottom_frame.pack(side=BOTTOM, fill=X) 
+
+        self.b_close = Button(self.bottom_frame, text='CLOSE', font=self.BUTTON_FONT, fg='white', bg='red', width=9, command=self.master.destroy)
+        self.b_close.pack(side=LEFT, pady=30, padx=30)
+
+    def create_help_window(self):
+        '''Creates help frame'''
+        self.help_frame = Frame(self.main_frame)
+        self.help_frame.pack(fill=BOTH, expand=True)
+        TITLE_STYLE = 'Arial 30 bold'
+        DESCRIPTION_STYLE = 'Arial 15'
+
+        # Centering all information
+        self.center_frame = Frame(self.help_frame)
+        self.center_frame.pack(side=TOP)
+
+        # Header
+        self.l_title = Label(self.center_frame, text='How To Play', font='Arial 50 bold', justify=CENTER)
+        self.l_title.grid(row=0, columnspan=2)
+        
+        self.l_description = Label(self.center_frame, font='Arial 20', text='Objective: Beat the dealer by getting a hand value as close to 21 as possible without going over.\n')
+        self.l_description.grid(row=1, columnspan=2)
+
+        # Card Values
+        self.l_cardvalues = Label(self.center_frame, font=TITLE_STYLE, text='Card Values')
+        self.l_cardvalues.grid(row=2, column=0, padx=10)
+
+        self.l_cardvalues_description = Label(self.center_frame, font=DESCRIPTION_STYLE, text='Number Cards (2-10): Face Value\nFace Cards (King, Queen, Jack): Worth 10\nAces: Worth 1 or 11\n')
+        self.l_cardvalues_description.grid(row=3, column=0, padx=10)
+
+        # Game Setup
+        self.l_gamesetup = Label(self.center_frame, font=TITLE_STYLE, text='Game Setup')
+        self.l_gamesetup.grid(row=4, column=0, padx=10)
+
+        self.l_gamesetup_description = Label(self.center_frame, font=DESCRIPTION_STYLE, text='1. You place a bet\n2. You and the dealer get two cards\n(your cards face up, dealer has one \nface up and one face down)\n')
+        self.l_gamesetup_description.grid(row=5, column=0, padx=10)
+
+        # Player Actions
+        self.l_playeractions = Label(self.center_frame, font=TITLE_STYLE, text='Player Actions')
+        self.l_playeractions.grid(row=6, column=0, padx=10)
+
+        self.l_playeractions_description = Label(self.center_frame, font=DESCRIPTION_STYLE, text='Hit: Take another card\nStand: Keep your current hand\nDouble Down: Double your bet and take \none more card')
+        self.l_playeractions_description.grid(row=7, column=0, padx=10)
+
+        # Dealer's Turn
+        self.l_dealerturn = Label(self.center_frame, font=TITLE_STYLE, text="Dealer's Turn")
+        self.l_dealerturn.grid(row=2, column=1, padx=10)
+
+        self.l_dealerturn_description = Label(self.center_frame, font=DESCRIPTION_STYLE, text='The dealer reveals their hole card and \nmust hit until reaching 17 or higher.\n')
+        self.l_dealerturn_description.grid(row=3, column=1, padx=10)
+
+        # Winning
+        self.l_winning = Label(self.center_frame, font=TITLE_STYLE, text='Winning')
+        self.l_winning.grid(row=4, column=1, padx=10)
+
+        self.l_winning_description = Label(self.center_frame, font=DESCRIPTION_STYLE, text="1. If your hand exceeds 21, you bust and lose\n2. If the dealer busts, you win\n3. If your hand is closer to 21 than the dealer's,\n you win (payout is 1:1)\n4. A tie results in a push, and you get your bet back")
+        self.l_winning_description.grid(row=5, column=1, padx=10)
+
+        # Back Button
+        self.b_back = Button(self.center_frame, text='BACK', font=self.BUTTON_FONT, fg='white', bg='red', width=9, command=lambda: self.open_window('Help', 'Menu'))
+        self.b_back.grid(row=7, column=1, padx=30)
+    
+    def create_betting_window(self):
+        '''Creates Betting frame'''
+        self.betting_frame = Frame(self.main_frame)
+        self.betting_frame.pack(fill=BOTH, expand=True)
+
+        # Shows Balance
+        self.l_balance = Label(self.betting_frame, text=f"Balance: ${self.shrink_big_number(self.data[self.profile.get()]['Balance'])}", font='Arial 40 bold')
+        self.l_balance.pack(side=TOP, fill=X, pady=10)
+
+        # Creates a frame to centre betting amount
+        self.center_frame = Frame(self.betting_frame)
+        self.center_frame.pack(expand=True)  # Center the frame in the window
+
+        # Betting Amount 
+        self.l_bet_title = Label(self.center_frame, text='Betting Amount: $', font='Arial 50 bold')
+        self.l_bet_title.pack(side=LEFT)
+
+        self.e_bet_amount = Entry(self.center_frame, font='Arial 50 bold')
+        self.e_bet_amount.pack(side=LEFT)
+
+        # Buttons
+        self.button_frame = Frame(self.betting_frame)
+        self.button_frame.pack(side=BOTTOM, pady=20)
+
+        self.b_back = Button(self.button_frame, text='BACK', font=self.BUTTON_FONT, fg='white', bg='red', width=9, command=lambda: self.open_window('Betting','Menu'))
+        self.b_back.pack(side=LEFT, padx=30)
+
+        self.b_bet = Button(self.button_frame, text='BET', font=self.BUTTON_FONT, fg='white', bg='green', width=9, command=self.bet)
+        self.b_bet.pack(side=LEFT, padx=30)
+    
+    def create_playing_window(self):
+        '''Creates playing frame'''
+        self.playing_frame=Frame(self.main_frame)
+        self.playing_frame.pack(fill=BOTH, expand=True)
+
+        self.background_colour = 'green'
+
+        # Creating and shuffling Deck
+        self.deck = pd.Deck()
+        self.deck.shuffle()
+
+        # Creating hands
+        self.dealer_hand = pd.Stack()
+        self.player_hand = pd.Stack()
+
+        # Deals initial cards
+        self.player_hand += self.deck.deal(2)
+        self.dealer_hand += self.deck.deal(1)
+        self.player_total = self.calculate_hand_value(self.player_hand)
+        self.dealer_total = self.calculate_hand_value(self.dealer_hand)
+
+# Sectioning information with frames
+        
+    # Dealer Frame
+        self.dealer_frame = Frame(self.playing_frame, bg='green', height=50)
+        self.dealer_frame.pack(fill=X, side=TOP)
+
+        self.l_dealer_title = Label(self.dealer_frame, bg='green', text='Dealer', font='Arial 50 bold')
+        self.l_dealer_title.pack()
+
+    # Cards Frame
+        self.cards_frame = Frame(self.playing_frame, bg='green')
+        self.cards_frame.pack(fill=BOTH, expand=True)
+        
+        # Player Cards & Score
+        self.l_player_total = Label(self.cards_frame, text=str(self.player_total), bg='green', font='Arial 30 bold', pady=10)
+        self.l_player_total.pack(side=BOTTOM)
+        
+        self.player_cards_frame = Frame(self.cards_frame, bg='white')
+        self.player_cards_frame.pack(side=BOTTOM)
+
+        self.player_card_images = []
+        # Displaying player cards as images
+        for card in self.player_hand:
+            self.player_card_images.append(self.get_card_image(card))
+
+        self.l_player_card = Label(self.player_cards_frame, image=self.player_card_images[0], bg='green')
+        self.l_player_card.pack(side=LEFT)
+
+        self.l_player_card = Label(self.player_cards_frame, image=self.player_card_images[1], bg='green')
+        self.l_player_card.pack(side=LEFT)
+
+        # Dealer Cards & Score
+        self.l_dealer_total = Label(self.cards_frame, text=str(self.dealer_total), bg='green', font='Arial 30 bold', pady=10)
+        self.l_dealer_total.pack(side=TOP)
+
+        self.dealer_cards_frame = Frame(self.cards_frame, bg='white')
+        self.dealer_cards_frame.pack(side=TOP)
+
+        self.dealer_card_images = []
+        # Displaying dealer cards as images
+        for card in self.dealer_hand:
+            self.dealer_card_images.append(self.get_card_image(card))
+
+        self.l_dealer_card = Label(self.dealer_cards_frame, image=self.dealer_card_images[0], bg='green')
+        self.l_dealer_card.pack(side=LEFT)
+
+    # Player Actions Frame
+        self.actions_frame = Frame(self.playing_frame, bg='green', height=100)
+        self.actions_frame.pack(fill=X, side=BOTTOM)
+
+        # Align buttons to the right within the player frame
+        self.right_align = Frame(self.actions_frame, bg='green')
+        self.right_align.pack(side=RIGHT)
+
+        self.b_hit = Button(self.right_align, text='HIT', font=self.BUTTON_FONT, fg='white', bg='red', width=9, command=lambda: self.hit('Player'))
+        self.b_hit.grid(column=2, row=0, padx=10, pady=5)
+
+        self.b_stand = Button(self.right_align, text='STAND', font=self.BUTTON_FONT, fg='white', bg='green', width=9, command=self.stand)
+        self.b_stand.grid(column=1, row=0, padx=10, pady=5)
+
+        if self.data[self.profile.get()]['Balance']>2*self.bet_amount:
+            self.b_double = Button(self.right_align, text='DOUBLE', font=self.BUTTON_FONT, fg='white', bg='red', width=9, command=self.double)
+            self.b_double.grid(column=0, row=0, padx=10, pady=5)
+
+    def create_profile_window(self):
+        '''Creates profile frame'''
+        self.profile_frame = Frame(self.main_frame)
+        self.profile_frame.pack(fill=BOTH, expand=True)
+
+        self.l_title = Label(self.profile_frame, text='Profiles', font='Arial 70 bold', pady=40)
+        self.l_title.pack(side=TOP)
+
+        self.profile = StringVar()
+
+        self.l_current = Label(self.profile_frame, text='Selected Profile:', font='Arial 20')
+        self.l_current.pack(side=TOP)
+
+        self.l_current_profile = Label(self.profile_frame, textvariable=self.profile, font='Arial 20 bold', fg='green')
+        self.l_current_profile.pack(side=TOP)
+
+        # Centering 
+        self.center_frame = Frame(self.profile_frame)
+        self.center_frame.pack(fill=X, side=TOP, pady=40)
+        self.center_frame.grid_columnconfigure([0, 1, 2], weight=1)
+        column_count = -1
+
+        DESCRIPTION_STYLE = 'Arial 20'
+        radio_button_font = tkFont.Font(family="Arial", size=10, weight="bold")
+        # Loops through all profiles
+        for key, value in self.data.items():
+            column_count += 1
+            self.individual_profile = Frame(self.center_frame, padx=65)
+            self.individual_profile.grid(row=0, column=column_count)
+
+            self.individual_profile.rowconfigure([0,1,2,3], minsize=10)
+
+            self.l_title = Label(self.individual_profile, text=key, font='Arial 50 bold', pady=20)
+            self.l_title.grid(columnspan=2, row=0)
+
+            self.l_balance = Label(self.individual_profile, text='Balance:', font=DESCRIPTION_STYLE)
+            self.l_balance.grid(column=0, row=2)
+
+            self.l_balance_amount = Label(self.individual_profile, text=f'${self.shrink_big_number(value["Balance"])}', font=DESCRIPTION_STYLE)
+            self.l_balance_amount.grid(column=1, row=2)
+
+            self.l_wins = Label(self.individual_profile, text='Wins:', font=DESCRIPTION_STYLE)
+            self.l_wins.grid(column=0, row=3)
+
+            self.l_wins_amount = Label(self.individual_profile, text=self.shrink_big_number(value["Wins"]), fg='green', font=DESCRIPTION_STYLE)
+            self.l_wins_amount.grid(column=1, row=3)
+
+            self.l_losses = Label(self.individual_profile, text='Losses:', font=DESCRIPTION_STYLE)
+            self.l_losses.grid(column=0, row=4)
+
+            self.l_losses_amount = Label(self.individual_profile, text=self.shrink_big_number(value["Losses"]), fg='red', font=DESCRIPTION_STYLE)
+            self.l_losses_amount.grid(column=1, row=4)
+
+            self.l_winrate = Label(self.individual_profile, text='Winrate:', font=DESCRIPTION_STYLE)
+            self.l_winrate.grid(column=0, row=5)
+            
+            # Calculating winrate
+            if value["Games"]>0:
+                winrate_percent = value["Wins"]/value["Games"]*100
+            else:
+                winrate_percent = 0
+
+            self.l_winrate_number = Label(self.individual_profile, text=f'{round(winrate_percent, 1)}%', fg='blue', font=DESCRIPTION_STYLE)
+            self.l_winrate_number.grid(column=1, row=5)
+
+            self.l_winstreak = Label(self.individual_profile, text='Winstreak:', font=DESCRIPTION_STYLE)
+            self.l_winstreak.grid(column=0, row=6)
+
+            self.l_winstreak_number = Label(self.individual_profile, text=value['Winstreak'], fg='blue', font=f'{DESCRIPTION_STYLE} bold')
+            self.l_winstreak_number.grid(column=1, row=6)
+
+            self.radio = Radiobutton(self.individual_profile, variable=self.profile, value=key, font=radio_button_font, indicatoron=0, width=2, height=1, borderwidth=0, bg='black')
+            self.radio.grid(columnspan=2, row=7, pady=20)
+        
+        self.profiles = list(self.data.keys())
+        self.profile.set(self.profiles[0]) # Sets first profile as default
+
+        self.button_frame = Frame(self.profile_frame)
+        self.button_frame.pack(side=BOTTOM, pady=40)
+
+        self.b_back = Button(self.button_frame, text='BACK', font=self.BUTTON_FONT, fg='white', bg='red', width=9, command=lambda: self.open_window('Profile', 'Menu'))
+        self.b_back.pack(side=LEFT, padx=30)
+
+        self.b_rename = Button(self.button_frame, text='RENAME', font=self.BUTTON_FONT, fg='white', bg=self.YELLOW, width=9, command=lambda: self.open_window('Profile', 'Rename'))
+        self.b_rename.pack(side=LEFT, padx=30)
+
+        self.b_play = Button(self.button_frame, text='PLAY', font=self.BUTTON_FONT, fg='white', bg='green', width=9, command=lambda: self.open_window('Profile','Betting'))
+        self.b_play.pack(side=LEFT, padx=30)
+    
+    def create_rename_window(self):
+        '''Creates profile rename frame'''
+        self.rename_profile_frame = Frame(self.main_frame)
+        self.rename_profile_frame.pack(fill=BOTH, expand=True)
+
+        # Showing Current profile in top
+        self.l_showprofile = Label(self.rename_profile_frame, text=self.profile.get(), font='Arial 40 bold')
+        self.l_showprofile.pack(side=TOP, fill=X, pady=10)
+
+        # Creates a frame to centre rename entry
+        self.center_frame = Frame(self.rename_profile_frame)
+        self.center_frame.pack(expand=True)  # Center the frame in the window
+
+        # Rename
+        self.l_rename_title = Label(self.center_frame, text='New Name: ', font='Arial 50 bold')
+        self.l_rename_title.pack(side=LEFT)
+
+        self.e_rename = Entry(self.center_frame, font='Arial 50 bold')
+        self.e_rename.pack(side=LEFT)
+
+        # Buttons
+        self.button_frame = Frame(self.rename_profile_frame)
+        self.button_frame.pack(side=BOTTOM, pady=20)
+
+        self.b_back = Button(self.button_frame, text='BACK', font=self.BUTTON_FONT, fg='white', bg='red', width=9, command=lambda: self.open_window('Rename','Profile'))
+        self.b_back.pack(side=LEFT, padx=30)
+
+        self.b_rename = Button(self.button_frame, text='CONFIRM', font=self.BUTTON_FONT, fg='white', bg='green', width=9, command=self.rename)
+        self.b_rename.pack(side=LEFT, padx=30)
+
+    def open_window(self, current_frame, window_name):
+        '''Opens new frames and destroys previously open one'''
+
+        current_frame.title()
+        window_name.title()
+
+        # Destroys Open frame
+        if current_frame == 'Menu':
+            self.menu_frame.destroy()
+        elif current_frame == 'Help':
+            self.help_frame.destroy()
+        elif current_frame == 'Profile':
+            self.profile_frame.destroy()
+        elif current_frame == 'Betting':
+            try: # Avoiding value error from empty bet amount entry box
+                self.bet_amount = int(self.e_bet_amount.get())
+            except:
+                pass
+            self.betting_frame.destroy()
+        elif current_frame == 'Playing':
+            self.playing_frame.destroy()
+        elif current_frame == 'Rename':
+            self.rename_profile_frame.destroy()
+
+        # Opens new frame
+        if window_name == 'Menu':
+            self.create_menu_window()
+        elif window_name == 'Help':
+            self.create_help_window()
+        elif window_name == 'Betting':
+            self.create_betting_window()
+        elif window_name == 'Playing':
+            self.create_playing_window()
+        elif window_name == 'Profile':
+            self.create_profile_window()
+        elif window_name == 'Rename':
+            self.create_rename_window()
+    
+    def bet(self):
+        '''Checks Betting amount is valid and opens window if so'''
+        try:
+            bet = int(self.e_bet_amount.get())
+            if bet>self.data[self.profile.get()]['Balance']:
+                messagebox.showerror('Error', 'Bet is higher than your balance. Enter lower bet.')
+            elif bet <= 0:
+                messagebox.showerror('Error', 'Bet must be greater than 0.')
+            else:
+                self.open_window('Betting', 'Playing')
+        except ValueError:
+            messagebox.showerror('Error', 'Enter only whole numbers.')
+    
+    def rename(self):
+        name = self.e_rename.get()
+        if len(name) > 0:
+            if name not in self.data:
+                if len(name) <= 10:
+                    answer = messagebox.askyesno("Confirmation", f"Are you sure you want to change {self.profile.get()} name to {name}")
+                    if answer == True:
+                        self.data[name] = self.data.pop(self.profile.get())
+                        self.save()
+                    self.open_window('Rename', 'Profile')
+                else:
+                    messagebox.showerror('Error', 'Name Too Long, Max 10 Characters.')
+            else:
+                messagebox.showerror('Error', 'Do not enter same name as another profile')
+        else:
+            messagebox.showerror('Error','Do not enter blank name.')
+
+    def calculate_hand_value(self, hand):
+        '''Calculates Hand Value'''
+        value = 0
+        aces = 0
+        for card in hand: # Loops through each card in given hand
+            if card.value in ['Jack', 'Queen', 'King']:
+                value += 10
+            elif card.value == 'Ace':
+                aces +=1
+                value += 11
+            else:
+                value += int(card.value)
+
+        while value > 21 and aces > 0:
+            # Changes ace value from 11 to 1 until no longer busting and no more aces
+            value -= 10 
+            aces -= 1
+        return value
+    
+    def hit(self, person):
+        '''Deals another card to hand'''
+        if person == 'Player':
+            self.b_double.destroy()
+            self.player_hand += self.deck.deal(1)
+
+            self.player_total = self.calculate_hand_value(self.player_hand)
+
+                # Displaying player cards as images
+            self.player_card_images.append(self.get_card_image(self.player_hand[-1]))
+            self.l_player_card = Label(self.player_cards_frame, image=self.player_card_images[-1], bg='green')
+            self.l_player_card.pack(side=LEFT)
+
+            self.l_player_total.configure(text=str(self.player_total))
+            if self.player_total > 21: # Checking if player busts
+                self.win_or_loss('Loss')
+                # Creates play again button
+                self.play_again()
+
+        elif person == 'Dealer':
+            # Dealing & showing dealer hand
+            self.dealer_hand += self.deck.deal(1)
+
+            # Displaying dealer cards as images
+            self.dealer_card_images.append(self.get_card_image(self.dealer_hand[-1]))
+            self.l_dealer_card = Label(self.dealer_cards_frame, image=self.dealer_card_images[-1], bg='green')
+            self.l_dealer_card.pack(side=LEFT)
+
+            self.l_dealer_total.configure(text=str(self.calculate_hand_value(self.dealer_hand)))
+
+    def win_or_loss(self, outcome):
+        '''Adds or removes bet amount to profile balance'''
+        outcome.title()
+        FONT = 'Arial 60 bold'
+        # If user losses
+        if outcome == 'Loss':
+            self.data[self.profile.get()]['Balance'] -= self.bet_amount
+            self.data[self.profile.get()]['Losses'] += 1
+            self.data[self.profile.get()]['Winstreak'] = 0
+            self.l_amount = Label(self.actions_frame, text=f'-${self.shrink_big_number(self.bet_amount)}', fg='black', font=FONT)
+            self.l_amount.pack(side=RIGHT, padx=20)
+            self.l_outcome = Label(self.actions_frame, text='Loss', fg='black', font=FONT)
+            self.l_outcome.pack(side=RIGHT, padx=20)
+            self.change_background(self.playing_frame, '#d40202')
+        
+        # If user wins
+        elif outcome == 'Win':
+            self.data[self.profile.get()]['Balance'] += self.bet_amount
+            self.data[self.profile.get()]['Wins'] += 1
+            self.data[self.profile.get()]['Winstreak'] += 1
+            self.l_amount = Label(self.actions_frame, text=f'+${self.shrink_big_number(self.bet_amount)}', fg='green', font=FONT)
+            self.l_amount.pack(side=RIGHT, padx=20)
+            self.l_outcome = Label(self.actions_frame, text='Win', fg='green', font=FONT)
+            self.l_outcome.pack(side=RIGHT, padx=20)
+            self.change_background(self.playing_frame, '#09d940')
+        
+        # If user ties with dealer
+        elif outcome == 'Push':
+            self.l_amount = Label(self.actions_frame, text=f'+$0', font=FONT)
+            self.l_amount.pack(side=RIGHT, padx=20)
+            self.l_outcome = Label(self.actions_frame, text='Push', font=FONT)
+            self.l_outcome.pack(side=RIGHT, padx=20)
+            self.change_background(self.playing_frame, '#c99802')
+            
+        self.data[self.profile.get()]['Games'] += 1
+        self.save()
+
+    def stand(self):
+        '''Deals dealer and determines who wins'''
+        while self.calculate_hand_value(self.dealer_hand) < 17: # Hits dealer until above 16
+            self.hit('Dealer')
+        self.player_total = self.calculate_hand_value(self.player_hand)
+        self.dealer_total = self.calculate_hand_value(self.dealer_hand) 
+
+        # Winning Conditions
+        if self.dealer_total > 21:
+            self.win_or_loss('Win')
+        elif self.player_total < self.dealer_total:
+            self.win_or_loss('Loss')
+        elif self.player_total > self.dealer_total:
+            self.win_or_loss('Win')
+        elif self.player_total == self.dealer_total:
+            self.win_or_loss('Push')
+        # Creates play again button 
+        self.play_again()
+    
+    def double(self):
+        '''Doubles Player Bet'''
+        self.bet_amount = self.bet_amount*2
+        self.hit('Player')
+        if self.calculate_hand_value(self.player_hand) <= 21: # Checking user hasnt already busted
+            self.stand()
+    
+    def save(self):
+        '''Saves data'''
+        with open('Gamehistory.json', 'w') as f:
+            j.dump(self.data, f, indent=4)
+
+    def play_again(self):
+        '''Creates Play Again or Create New Account Button'''
+        self.right_align.destroy()
+        self.b_menu = Button(self.actions_frame, text='MENU', font=self.BUTTON_FONT, fg='white', bg='red', width=9, command=lambda: self.open_window('Playing', 'Menu'))
+        self.b_menu.pack(side=LEFT, pady=10, padx=20)
+
+        if self.data[self.profile.get()]['Balance'] > 0:
+            # Creates play again button 
+                self.b_replay = Button(self.cards_frame, text='PLAY AGAIN', font=self.BUTTON_FONT, fg='white', bg=self.YELLOW, command=lambda: self.open_window('Playing', 'Betting'))
+                self.b_replay.place(relx=0.5, rely=0.5, anchor=CENTER)
+        else:
+            # Resets profile
+            messagebox.showinfo('No Money','Account Balance = 0')
+            self.b_replay = Button(self.cards_frame, text='CREATE NEW ACCOUNT', font=self.BUTTON_FONT, fg='white', bg=self.YELLOW, command=lambda: self.open_window('Playing', 'Betting'))
+            self.b_replay.place(relx=0.5, rely=0.5, anchor=CENTER)
+            self.data[self.profile.get()]['Balance'] = 1000
+            self.data[self.profile.get()]['Wins'] = 0
+            self.data[self.profile.get()]['Losses'] = 0
+            self.data[self.profile.get()]['Games'] = 0
+            self.data[self.profile.get()]['Winstreak'] = 0
+            self.save()
+
+
+    def get_card_image(self, card):
+        '''Gets image for card'''
+        try:
+            if card.value == "10":
+                original_image = Image.open(f"PNG/10{card.suit[0]}.png")
+            else:
+                original_image = Image.open(f"PNG/{card.value[0]}{card.suit[0]}.png")
+            
+            original_image = original_image.resize((100, 150), Image.LANCZOS)
+            return ImageTk.PhotoImage(original_image)
+        except FileNotFoundError:
+            print('File not Found')
+    
+    def change_background(self, parent, color):
+        '''Changes background colour of all Labels and Frames in given parent'''
+        for child in parent.winfo_children():
+            if isinstance(child, (Label, Frame)):
+                child.config(bg=color)
+
+            if child.winfo_children(): 
+                self.change_background(child, color)
+    def shrink_big_number(self, number):
+        '''If number is over 1 billion, it will be reformated'''
+        if number >1000000000:
+            return "{:.6g}".format(number)
+        else:
+            return number
+app=Windows()
