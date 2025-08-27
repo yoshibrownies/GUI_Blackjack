@@ -543,21 +543,19 @@ class Windows:
         self.b_menu = Button(self.actions_frame, text='MENU', font=self.BUTTON_FONT, fg='white', bg='red', width=9, command=lambda: self.open_window('Playing', 'Menu'))
         self.b_menu.pack(side=LEFT, pady=10, padx=20)
 
-        if self.data[self.profile.get()]['Balance'] > 0:
-            # Creates play again button 
-                self.b_replay = Button(self.cards_frame, text='PLAY AGAIN', font=self.BUTTON_FONT, fg='white', bg=self.YELLOW, command=lambda: self.open_window('Playing', 'Betting'))
-                self.b_replay.place(relx=0.5, rely=0.5, anchor=CENTER)
-        else:
+        if self.data[self.profile.get()]['Balance'] <= 0:
             # Resets profile
-            messagebox.showinfo('No Money','Account Balance = 0')
-            self.b_replay = Button(self.cards_frame, text='CREATE NEW ACCOUNT', font=self.BUTTON_FONT, fg='white', bg=self.YELLOW, command=lambda: self.open_window('Playing', 'Betting'))
-            self.b_replay.place(relx=0.5, rely=0.5, anchor=CENTER)
+            messagebox.showinfo('No Money','Account Balance = 0, ACCOUNT RESET')
             self.data[self.profile.get()]['Balance'] = 1000
             self.data[self.profile.get()]['Wins'] = 0
             self.data[self.profile.get()]['Losses'] = 0
             self.data[self.profile.get()]['Games'] = 0
             self.data[self.profile.get()]['Winstreak'] = 0
             self.save()
+
+        # Creates play again button 
+        self.b_replay = Button(self.cards_frame, text='PLAY AGAIN', font=self.BUTTON_FONT, fg='white', bg=self.YELLOW, command=lambda: self.open_window('Playing', 'Betting'))
+        self.b_replay.place(relx=0.5, rely=0.5, anchor=CENTER)
 
 
     def get_card_image(self, card):
