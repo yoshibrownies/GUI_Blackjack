@@ -1,23 +1,23 @@
 {
-    "Player1": {
-        "Balance": 1003,
-        "Wins": 2,
-        "Losses": 1,
-        "Games": 4,
-        "Winstreak": 2
+    "yoShi": {
+        "Balance": 488,
+        "Wins": 4,
+        "Losses": 20,
+        "Games": 25,
+        "Winstreak": 1
     },
-    "Player2": {
-        "Balance": 977,
-        "Wins": 14,
-        "Losses": 52,
-        "Games": 71,
+    "Player 1": {
+        "Balance": 1080,
+        "Wins": 15,
+        "Losses": 25,
+        "Games": 43,
         "Winstreak": 0
     },
-    "Player3": {
-        "Balance": 699,
-        "Wins": 8,
-        "Losses": 20,
-        "Games": 40,
-        "Winstreak": 5
+    "32": {
+        "Balance": 808,
+        "Wins": 0,
+        "Losses": 4,
+        "Games": 5,
+        "Winstreak": 0
     }
 }
